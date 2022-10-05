@@ -3,6 +3,7 @@ import express from "express";
 import { config } from "dotenv";
 import userRouter from "./routes/user.js"
 import simplesRouter from "./routes/simplesRoutes.js"
+import ucRouter from "./routes/ucRoutes.js"
 import errorHandler from "./middleware/errorHandler.js";
 import { connectDB } from "./config/database.js"
 import passport from "passport"
@@ -25,6 +26,7 @@ app.use(cookieParser())
 // Using routes
 app.use("/user", userRouter)
 app.use("/simples", simplesRouter)
+app.use("/uc", ucRouter)
 
 // Connecting Database
 connectDB(URI)
