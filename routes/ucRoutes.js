@@ -12,7 +12,7 @@ router.post("/new", isAuthenticated, newUC)
 router.get("/fetchall", isAuthenticated, fetchAllUCs)
 router.post("/update/:id", isAuthenticated, updateUC)
 router.delete("/delete/:id", isAuthenticated, deleteUC)
-router.post("/batchucs", isAuthenticated, upload.single('csvFile'), batchUCs)
+router.post("/batch", isAuthenticated, upload.single('csvFile'), batchUCs)
 
 // Export (default)
 export default router

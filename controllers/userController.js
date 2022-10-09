@@ -7,11 +7,11 @@ import { sendToken } from "../utils/sendToken.js"
 
 // New User Registration controller
 export const newUser = async (req, res, next) => {
-    const { username, email, password } = req.body
+    const { name, cnic, email, password } = req.body
     try {
         // const { avatar } = req.files;
-
-        let foundUser = await User.findOne({ email })
+        let foundUser = await User.findOne({ cnic })
+        console.log(foundUser)
         if (foundUser) {
             return next(new ErrorResponse("User already exisits", 400))
         }
@@ -21,10 +21,10 @@ export const newUser = async (req, res, next) => {
             .createHash("sha256")
             .update(randomOtp)
             .digest("hex")
-        console.log(otp)
 
         foundUser = await User.create({
-            username,
+            name,
+            cnic,
             email,
             password,
             avatar: {
@@ -262,3 +262,27 @@ export const updatePassword = async (req, res, next) => {
         next(new ErrorResponse("Failed to update password", 400))
     }
 };
+
+//Batch create Users with CSV file
+export const batchUsers = async (req, res, next) => {
+    const allRecords = []
+    try {
+        const coolPath = path.join('./', '/public/csv/' + req.file.filename)
+        const streamCSV = fs.createReadStream(coolPath)
+        streamCSV.pipe(csv.parse({ headers: true }))
+            .on('error', error => console.error(error))
+            .on('data', row => allRecords.push(row))
+            .on('end', rowCount => {
+                console.log(`Parsed ${rowCount} rows`)
+                try {
+                    const insertedUsers = User.insertMany(allRecords)
+                    return res.status(200).json(`${rowCount} Users have been inserted`)
+                } catch (error) {
+                    return res.status(404).json("Could not be insted in database")
+                }
+            }
+            );
+    } catch (error) {
+        return next(new ErrorResponse("Failed to batch create users", 400))
+    }
+}

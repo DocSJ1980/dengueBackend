@@ -2,7 +2,10 @@ import mongoose, { Schema, model } from "mongoose";
 
 // Defining Simple Activity Scheme with mongoose
 const ucSchema = new Schema({
-  town: { type: String },
+  town: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Town'
+  },
   ucSort: { type: Number },
   trackingUC: { type: String },
   survUC: { type: String },

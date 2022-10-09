@@ -6,9 +6,9 @@ import bcrypt from "bcryptjs";
 
 // Defining User Scheme with mongoose
 const userSchema = new Schema({
-    username: {
-        type: String,
-        required: [true, "Please provide a username"]
+    cnic: {
+        type: Number,
+        required: [true, "Please provide your CNIC"]
     },
     email: {
         type: String,
@@ -25,13 +25,27 @@ const userSchema = new Schema({
         minlength: [8, "Password must be at least 8 characters long"],
         select: false,
     },
+    name: {
+        type: String
+    },
+    dob: {
+        type: Date
+    },
+    doj: {
+        type: Date
+    },
+    bps: {
+        type: String
+    },
+    status: {
+        type: String
+    },
+    desig: {
+        type: String
+    },
     avatar: {
         public_id: String,
         url: String,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
     },
     simpleActivities: [
         {
@@ -45,6 +59,16 @@ const userSchema = new Schema({
             ref: "User"
         },
     ],
+    uc: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "UC"
+        },
+    ],
+    pitbUser: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PitbUser"
+    },
     following: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -59,7 +83,7 @@ const userSchema = new Schema({
     otp_expiry: Date,
     resetPasswordOtp: String,
     resetPasswordOtpExpiry: Date,
-});
+}, { timestamps: true });
 
 // Hashing pw before saving
 userSchema.pre("save", async function (next) {
