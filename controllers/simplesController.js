@@ -125,7 +125,8 @@ export const batchSimples = async (req, res, next) => {
     // console.log(allActivities)
     try {
         const insertedSimples = await SimpleActivity.insertMany(allActivities)
-        return res.status(200).json("Batch of 20 Simple Activities have been inserted")
+        const countActivities = allActivities.length
+        return res.status(200).json(`Batch of ${countActivities} Simple Activities have been inserted`)
     } catch (error) {
         return next(new ErrorResponse("Failed to batch create UCs", 400))
     }
