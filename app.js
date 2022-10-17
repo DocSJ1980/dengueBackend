@@ -5,6 +5,7 @@ import userRouter from "./routes/user.js"
 import simplesRouter from "./routes/simplesRoutes.js"
 import ucRouter from "./routes/ucRoutes.js"
 import townRouter from "./routes/townRoutes.js"
+import dengueTeamRouter from "./routes/dengueTeamRoutes.js"
 import errorHandler from "./middleware/errorHandler.js";
 import { connectDB } from "./config/database.js"
 import passport from "passport"
@@ -29,6 +30,7 @@ app.use("/user", userRouter)
 app.use("/simples", simplesRouter)
 app.use("/uc", ucRouter)
 app.use("/town", townRouter)
+app.use("/teams", dengueTeamRouter)
 
 // Connecting Database
 connectDB(URI)

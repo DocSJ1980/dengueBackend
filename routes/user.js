@@ -1,6 +1,6 @@
 // Imports (express, named imports from userControlller)
 import express from "express"
-import { login, newUser, forgotPassword, resetPassword, verify, logout, getMyProfile, updateProfile, updatePassword, batchUsers, followUser } from "../controllers/userController.js"
+import { login, newUser, forgotPassword, resetPassword, verify, logout, getMyProfile, updateProfile, updatePassword, batchUsers, followUser, setSupervisor } from "../controllers/userController.js"
 import { isAuthenticated } from "../middleware/auth.js";
 import { upload } from "../utils/csvUploader.js"
 
@@ -21,6 +21,8 @@ router.post("/updateprofile", isAuthenticated, updateProfile);
 router.post("/updatepassword", isAuthenticated, updatePassword);
 router.post("/batch", isAuthenticated, upload.single('csvFile'), batchUsers)
 router.get("/follow/:id", isAuthenticated, followUser)
+router.put("/setsuper", isAuthenticated, setSupervisor)
+
 
 
 // Export (default)

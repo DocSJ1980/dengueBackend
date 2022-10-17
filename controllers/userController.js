@@ -4,6 +4,7 @@ import User from "../models/userModel.js"
 import crypto from 'crypto'
 import sendEmail from "../utils/sendEmail.js"
 import { sendToken } from "../utils/sendToken.js"
+import UC from "../models/ucModel.js"
 
 // New User Registration controller
 export const newUser = async (req, res, next) => {
@@ -328,5 +329,66 @@ export const followUser = async (req, res, next) => {
     }
     catch (err) {
         return next(new ErrorResponse("Failed to Follow / Un-Follow", 400))
+    }
+}
+
+export const getAllActivitiesOfFollowing = async (req, res, next) => {
+    try {
+        const loggedInUser = await User.findById(req.user._id)
+        if (loggedInUser.following.includes(userToFollow._id)) {
+
+            return res.status(200).json({
+                success: true,
+                message: "User Un-Followed",
+            })
+        }
+        else {
+            res.status(200).json({
+                success: true,
+                message: "User followed",
+            })
+        }
+    }
+    catch (err) {
+        return next(new ErrorResponse("Failed to Follow / Un-Follow", 400))
+    }
+}
+
+export const setSupervisor = async (req, res, next) => {
+    const superv = await User.findById(req.body.superID)
+    const uc = await UC.findById(req.body.UCID)
+    try {
+        console.log("try block reached")
+        if (!superv) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            })
+        } else if (!uc) {
+            return res.status(404).json({
+                success: false,
+                message: "UC not found",
+            })
+        } else if (uc.supervisor.equals(superv._id)) {
+            console.log("super check reached")
+            return res.status(404).json({
+                success: false,
+                message: `${superv.name} is already supervisor of ${uc.survUC}`
+            })
+        }
+        else {
+            uc.supervisor = superv._id
+            console.log("final else reached")
+
+            await uc.save()
+
+            res.status(200).json({
+                success: true,
+                message: `${superv.name} assigned as supervisor to ${uc.survUC}`
+            })
+        }
+    }
+    catch (err) {
+        return next(new ErrorResponse(`Failed to set ${superv.name} as supervisor of ${uc.survUC}`, 400))
     }
 }

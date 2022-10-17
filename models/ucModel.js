@@ -30,9 +30,13 @@ const ucSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
-  members: [{
+  indoorTeams: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'DengueTeam'
+  }],
+  outdoorTeams: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'DengueTeam'
   }],
   area: [
     {

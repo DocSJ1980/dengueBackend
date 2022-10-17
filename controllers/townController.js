@@ -4,8 +4,6 @@ import ErrorResponse from "../utils/Error.js"
 import fs from 'fs'
 import path from 'path'
 import csv from 'fast-csv';
-import { Url } from "url";
-const __dirname = new Url('.', import.meta.url).pathname
 
 //FIRST ROUTE: Get all the simple activities
 export const fetchAllTowns = async (req, res, next) => {
