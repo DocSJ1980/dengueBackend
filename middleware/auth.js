@@ -6,7 +6,12 @@ export const isAuthenticated = async (req, res, next) => {
     try {
         const { token } = req.cookies;
         if (!token) {
-            return res.status(401).json({ success: false, message: "Login First" });
+            return res.status(401).json(
+                { 
+                    success: false,
+                     message: "Login First"
+                     }
+                     );
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);

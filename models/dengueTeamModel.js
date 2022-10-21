@@ -4,8 +4,12 @@ import mongoose, { Schema, model } from "mongoose";
 const dengueTeamSchema = new Schema({
     teamType: {
         type: String,
+
         enum: ['Indoor', 'Outdoor'],
         required: true
+    },
+    teamNo: {
+        type: Number
     },
     currentMembers: [{
         type: mongoose.Schema.Types.ObjectId,

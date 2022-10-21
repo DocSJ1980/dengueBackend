@@ -357,6 +357,7 @@ export const getAllActivitiesOfFollowing = async (req, res, next) => {
 export const setSupervisor = async (req, res, next) => {
     const superv = await User.findById(req.body.superID)
     const uc = await UC.findById(req.body.UCID)
+    console.log(superv._id, uc.supervisor)
     try {
         console.log("try block reached")
         if (!superv) {
@@ -364,24 +365,22 @@ export const setSupervisor = async (req, res, next) => {
                 success: false,
                 message: "User not found",
             })
-        } else if (!uc) {
+        }
+         else if (!uc) {
             return res.status(404).json({
                 success: false,
                 message: "UC not found",
             })
-        } else if (uc.supervisor.equals(superv._id)) {
+        } else if (superv._id.equals(uc.supervisor)) {
             console.log("super check reached")
             return res.status(404).json({
-                success: false,
+                success: false ,
                 message: `${superv.name} is already supervisor of ${uc.survUC}`
             })
-        }
-        else {
-            uc.supervisor = superv._id
+        } else {
             console.log("final else reached")
-
+            uc.supervisor = superv._id
             await uc.save()
-
             res.status(200).json({
                 success: true,
                 message: `${superv.name} assigned as supervisor to ${uc.survUC}`
