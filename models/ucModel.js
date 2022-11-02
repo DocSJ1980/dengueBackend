@@ -38,80 +38,17 @@ const ucSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'DengueTeam'
   }],
-  area: [
-    {
-      polioAreaIncharge: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      },
-      polioTeam: {
-        day1: {
-          street: [{
-            address: { type: String, required: true },
-            house: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'House'
-            }],
-            spot: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'Spot'
-            }]
-          }]
-        },
-        day2: {
-          street: [{
-            address: { type: String, required: true },
-            house: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'House'
-            }],
-            spot: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'Spot'
-            }]
-          }]
-        },
-        day3: {
-          street: [{
-            address: { type: String, required: true },
-            house: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'House'
-            }],
-            spot: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'Spot'
-            }]
-          }]
-        },
-        day4: {
-          street: [{
-            address: { type: String, required: true },
-            house: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'House'
-            }],
-            spot: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'Spot'
-            }]
-          }]
-        },
-        day5: {
-          street: [{
-            address: { type: String, required: true },
-            house: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'House'
-            }],
-            spot: [{
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'Spot'
-            }]
-          }]
-        },
-      },
-    }],
+  polioSubUCs: [{
+    aic: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    polioTeams: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'PolioTeam'
+    }]
+  }]
+
 },
   { timestamps: true });
 

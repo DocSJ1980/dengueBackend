@@ -1,0 +1,22 @@
+polioTeamModel
+polioDayModel
+houseModel
+spotModel
+issueModel
+polioMPGen route
+Assign Ento, townEnto, ddho
+CRUD endpoints for houseModel with controllers and route
+CRUD endpoints for houseModel with controllers and route
+dengueTeam assignment route+controller to polio Days
+learn to handle image in polioDayModel, houseModel, spotModel
+endpoints for dropdowns of town, UC, spotType
+Logic to attach activities to teams
+Comment system
+Bogus System
+activity endpoints
+
+
+
+
+TODO-FrontEnd
+Image compression (https://www.youtube.com/watch?v=bXf_UdyDzSA -OR- https://github.com/imagemin/imagemin)
