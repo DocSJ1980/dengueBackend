@@ -5,7 +5,7 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js"
+    "dev": "nodemon --legacy-watch app.js"
   },
   "author": "",
   "license": "ISC",

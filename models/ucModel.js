@@ -38,16 +38,12 @@ const ucSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'DengueTeam'
   }],
-  polioSubUCs: [{
-    aic: {
+  polioSubUCs: {
+    aic: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    polioTeams: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'PolioTeam'
+      ref: 'Aic'
     }]
-  }]
+  }
 
 },
   { timestamps: true });

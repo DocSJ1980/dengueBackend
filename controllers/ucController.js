@@ -3,9 +3,10 @@ import UC from "../models/ucModel.js"
 import ErrorResponse from "../utils/Error.js"
 import fs from 'fs'
 import path from 'path'
-import csv from 'fast-csv';
-import { Url } from "url";
+import csv from 'fast-csv'
+import { Url } from "url"
 const __dirname = new Url('.', import.meta.url).pathname
+import { Aic, PolioTeam, PolioDay } from "../models/polioTeamModel.js"
 
 //FIRST ROUTE: Get all the simple activities
 export const fetchAllUCs = async (req, res, next) => {
@@ -108,5 +109,78 @@ export const batchUCs = async (req, res, next) => {
             );
     } catch (error) {
         return next(new ErrorResponse("Failed to batch create UCs", 400))
+    }
+}
+
+export const polioMPGen = async (req, res, next) => {
+    const { teamData } = req.body
+    try {
+        let i = 0
+        while (i < teamData.length) {
+            const { aicNumber, teams, fixedTeam, transitTeams } = teamData[i]
+            const foundUC = await UC.findOne({ supervisor: req.user._id })
+            if (foundUC) {
+                const newAic = await Aic.create({ aicNumber })
+                if (teams.length > 0) {
+                    try {
+                        for (let j = 0; j < teams.length; j++) {
+                            const teamNo = teams[j]
+                            const teamType = "Mobile"
+                            const newPolioTeam = await PolioTeam.create({ teamNo, teamType })
+                            try {
+                                for (let dayNo = 1; dayNo < 6; dayNo++) {
+                                    const newPolioDay = await PolioDay.create({ dayNo })
+                                    newPolioTeam.polioDays.push(newPolioDay._id)
+                                    await newPolioTeam.save()
+                                }
+                            } catch (error) {
+                                return next(new ErrorResponse("Failed to create PolioDays", 404))
+                            }
+                            newAic.polioTeams.mobilePolioTeams.push(newPolioTeam._id)
+                            await newAic.save()
+                        }
+                    } catch (error) {
+                        return next(new ErrorResponse("Failed to create Mobile PolioTeam", 404))
+                    }
+                }
+                if (fixedTeam.length > 0) {
+                    try {
+                        for (let k = 0; k < fixedTeam.length; k++) {
+                            const teamNo = fixedTeam[k]
+                            const teamType = "Fixed"
+                            const newPolioTeam = await PolioTeam.create({ teamNo, teamType })
+                            newAic.polioTeams.fixedPolioTeams.push(newPolioTeam._id)
+                            await newAic.save()
+                            console.log("FixedTeam block completed successfully")
+                        }
+                    } catch (error) {
+                        return next(new ErrorResponse("Failed to create Fixed PolioTeam", 404))
+                    }
+                }
+                if (transitTeams.length > 0) {
+                    try {
+                        for (let l = 0; l < transitTeams.length; l++) {
+                            console.log("transitTeams block reached")
+                            const teamNo = transitTeams[l]
+                            const teamType = "Transit"
+                            const newPolioTeam = await PolioTeam.create({ teamNo, teamType })
+                            console.log("transitTeams created")
+                            newAic.polioTeams.transitPolioTeams.push(newPolioTeam._id)
+                            await newAic.save()
+                        }
+                    } catch (error) {
+                        return next(new ErrorResponse("Failed to create Transit PolioTeam", 404))
+                    }
+                }
+                // const createdSubUCs = { aic, polioTeams }
+                foundUC.polioSubUCs.aic.push(newAic._id)
+                await foundUC.save()
+            }
+            // console.log(foundUC)
+            i++
+        }
+        return res.status(200).json("Endpoint reached")
+    } catch (error) {
+        return next(new ErrorResponse("Failed to Generate Polio Micro-Plan", 400))
     }
 }

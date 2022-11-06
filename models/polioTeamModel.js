@@ -1,26 +1,34 @@
 import mongoose, { Schema, model } from "mongoose";
 
 const aicSchema = new Schema({
-    polioTeams: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Team'
-    }]
+    aicNumber: { type: String, required: true },
+    polioTeams: {
+        mobilePolioTeams: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Team'
+        }],
+        fixedPolioTeams: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Team'
+        }],
+        transitPolioTeams: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Team'
+        }]
+    }
 },
     { timestamps: true })
 
-const Aic = mongoose.model("aic", aicSchema);
-module.exports = Aic;
-
-
-import mongoose, { Schema, model } from "mongoose";
+export const Aic = mongoose.model("aic", aicSchema);
 
 const polioTeamSchema = new Schema({
     teamNo: {
-        type: Number
+        type: Number,
+        required: true
     },
     teamType: {
         type: String,
-        enum: ['Mobile', 'Fixed', 'Roaming'],
+        enum: ['Mobile', 'Fixed', 'Transit'],
         required: true
     },
     polioDays: [{
@@ -31,18 +39,17 @@ const polioTeamSchema = new Schema({
     { timestamps: true })
 
 polioTeamSchema.path('polioDays').validate(function (value) {
-    console.log(value.length)
     if (value.length > 5) {
         throw new Error("Only 5 Polio Days can be assigned to a polio team!");
     }
 })
 
 
-const PolioTeam = mongoose.model("polioTeam", polioTeamSchema);
-module.exports = PolioTeam;
+export const PolioTeam = mongoose.model("polioTeam", polioTeamSchema);
 
 const polioDay = new Schema({
-    area: { type: String, required: true, minimumLength: 100 },
+    dayNo: { type: "Number", required: true },
+    area: { type: String, minimumLength: 100 },
     startingImg: { type: String },
     endingImg: { type: String },
     wayPointImgs: [{ type: String }],
@@ -65,6 +72,5 @@ const polioDay = new Schema({
     { timestamps: true })
 
 
-const PolioDay = mongoose.model("polioDay", polioDay);
-module.exports = PolioDay;
+export const PolioDay = mongoose.model("polioDay", polioDay);
 

@@ -1,6 +1,6 @@
 // Imports (express, named imports from userControlller)
 import express from "express"
-import { fetchAllUCs, newUC, updateUC, deleteUC, batchUCs } from "../controllers/ucController.js"
+import { fetchAllUCs, newUC, updateUC, deleteUC, batchUCs, polioMPGen } from "../controllers/ucController.js"
 import { isAuthenticated } from "../middleware/auth.js"
 import { upload } from "../utils/csvUploader.js"
 
@@ -13,6 +13,7 @@ router.get("/fetchall", isAuthenticated, fetchAllUCs)
 router.post("/update/:id", isAuthenticated, updateUC)
 router.delete("/delete/:id", isAuthenticated, deleteUC)
 router.post("/batch", isAuthenticated, upload.single('csvFile'), batchUCs)
+router.post("/poliompgen", isAuthenticated, polioMPGen)
 
 // Export (default)
 export default router
