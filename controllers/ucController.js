@@ -196,3 +196,25 @@ export const polioMPGen = async (req, res, next) => {
         return res.status(404).json("You are not supervisor of requested UC")
     }
 }
+
+//SEVENTH ROUTE: Get UC details of logged in user
+export const fetchUC = async (req, res, next) => {
+    try {
+        const fetchedUC = await UC.findOne({ supervisor: req.user._id })
+            .populate({
+                path: 'polioSubUCs.aic',
+                model: Aic,
+                populate: {
+                    path: 'polioTeams.mobilePolioTeams polioTeams.fixedPolioTeams polioTeams.transitPolioTeams',
+                    model: PolioTeam,
+                    populate: {
+                        path: 'polioDays',
+                        model: PolioDay
+                    }
+                }
+            });
+        res.json(fetchedUC);
+    } catch (error) {
+        res.json("No UC Found")
+    }
+};
