@@ -218,3 +218,55 @@ export const fetchUC = async (req, res, next) => {
         res.json("No UC Found")
     }
 };
+
+//EIGHT ROUTE: Purge Polio Micro-Plan
+export const polioMPPurge = async (req, res, next) => {
+    try {
+        const fetchedUC = await UC.findOne({ supervisor: req.user._id })
+        let i = 0
+        while (i < fetchedUC.polioSubUCs.aic.length) {
+            const fetchedAic = await Aic.findOne({ _id: fetchedUC.polioSubUCs.aic[i] })
+            let j = 0
+            console.log(fetchedAic.polioTeams.mobilePolioTeams.length, fetchedAic.polioTeams.fixedPolioTeams.length, fetchedAic.polioTeams.transitPolioTeams.length)
+            while (j < fetchedAic.polioTeams.mobilePolioTeams.length) {
+                const fetchedPolioTeam = await PolioTeam.findOne({
+                    _id: fetchedAic.polioTeams.mobilePolioTeams[j]
+                })
+                let k = 0
+                while (k < fetchedPolioTeam.polioDays.length) {
+                    await PolioDay.findByIdAndDelete({ _id: fetchedPolioTeam.polioDays[k] })
+                    k++
+                }
+                await PolioTeam.findByIdAndDelete({
+                    _id: fetchedAic.polioTeams.mobilePolioTeams[j]
+                })
+                j++
+            }
+            j = 0
+            if (fetchedAic.polioTeams.fixedPolioTeams.length > 0) {
+                while (j < fetchedAic.polioTeams.fixedPolioTeams.length) {
+                    await PolioTeam.findByIdAndDelete({
+                        _id: fetchedAic.polioTeams.fixedPolioTeams[j]
+                    })
+                    j++
+                }
+            }
+            j = 0
+            if (fetchedAic.polioTeams.transitPolioTeams.length > 0) {
+                while (j < fetchedAic.polioTeams.transitPolioTeams.length) {
+                    await PolioTeam.findByIdAndDelete({
+                        _id: fetchedAic.polioTeams.transitPolioTeams[j]
+                    })
+                    j++
+                }
+            }
+            await Aic.findByIdAndDelete({ _id: fetchedUC.polioSubUCs.aic[i] })
+            i++
+        }
+        fetchedUC.polioSubUCs = []
+        await fetchedUC.save()
+        res.json(fetchedUC);
+    } catch (error) {
+        res.json("Purge Operations Failed")
+    }
+};
