@@ -9,7 +9,7 @@ import mongoose from "mongoose"
 //FIRST ROUTE: Get all the simple activities
 
 //SECOND ROUTE: Batch create Towns with CSV file
-export const createTeams = async (req, res, next) => {
+export const dtCreate = async (req, res, next) => {
     const loggedInUser = await User.findById(req.user._id)
     const uc = await UC.find({ 'supervisor': mongoose.Types.ObjectId(loggedInUser._id) })
     const ucID = uc[0]._id

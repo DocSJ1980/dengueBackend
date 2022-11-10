@@ -4,9 +4,10 @@ import ErrorResponse from "../utils/Error.js"
 import fs from 'fs'
 import path from 'path'
 import csv from 'fast-csv'
-import { Url } from "url"
-const __dirname = new Url('.', import.meta.url).pathname
 import { Aic, PolioTeam, PolioDay } from "../models/polioTeamModel.js"
+
+// import { Url } from "url"
+// const __dirname = new Url('.', import.meta.url).pathname
 
 //FIRST ROUTE: Get all the simple activities
 export const fetchAllUCs = async (req, res, next) => {
@@ -112,161 +113,41 @@ export const batchUCs = async (req, res, next) => {
     }
 }
 
-//SIXTH ROUTE: Create polio micor-plan with team data from frontend
-export const polioMPGen = async (req, res, next) => {
-    //Destructuring team data from frontend
-    const { teamData } = req.body
-    //Finding UC from logged in user and checking if he is supervisor or not
-    const foundUC = await UC.findOne({ supervisor: req.user._id })
-    if (foundUC) {
-        //Creating aic, polioTeams and polioDays
-        try {
-            let i = 0
-            //Creating aics looping through teamData array
-            while (i < teamData.length) {
-                const { aicNumber, mobileTeams, fixedTeam, transitTeams } = teamData[i]
-                const newAic = await Aic.create({ aicNumber })
-                //Creating mobilePolioTeams looping on the length of mobileTeams array in teamData 
-                if (mobileTeams.length > 0) {
-                    try {
-                        for (let j = 0; j < mobileTeams.length; j++) {
-                            const teamNo = mobileTeams[j]
-                            const teamType = "Mobile"
-                            const newPolioTeam = await PolioTeam.create({ teamNo, teamType })
-                            //Creating 5 days for each mobilePolioTeam
-                            try {
-                                for (let dayNo = 1; dayNo < 6; dayNo++) {
-                                    const newPolioDay = await PolioDay.create({ dayNo })
-                                    //Referencing created day in the loop to newPolioTeam in the loop and saving the team 
-                                    newPolioTeam.polioDays.push(newPolioDay._id)
-                                    await newPolioTeam.save()
-                                }
-                            } catch (error) {
-                                return next(new ErrorResponse("Failed to create PolioDays", 404))
-                            }
-                            //Referencing newPolioTeam along with created and referenced days in the above loop to newAic in the loop and saving aic 
-                            newAic.polioTeams.mobilePolioTeams.push(newPolioTeam._id)
-                            await newAic.save()
-                        }
-                    } catch (error) {
-                        return next(new ErrorResponse("Failed to create Mobile PolioTeam", 404))
-                    }
-                }
-                //Creating fixedPolioTeams looping on the length of fixedTeams array in teamData 
-                if (fixedTeam.length > 0) {
-                    try {
-                        //Referencing newPolioTeam to newAic in the loop and saving aic 
-                        for (let k = 0; k < fixedTeam.length; k++) {
-                            const teamNo = fixedTeam[k]
-                            const teamType = "Fixed"
-                            const newPolioTeam = await PolioTeam.create({ teamNo, teamType })
-                            newAic.polioTeams.fixedPolioTeams.push(newPolioTeam._id)
-                            await newAic.save()
-                        }
-                    } catch (error) {
-                        return next(new ErrorResponse("Failed to create Fixed PolioTeam", 404))
-                    }
-                }
-                //Creating transitPolioTeams looping on the length of transitTeams array in teamData 
-                if (transitTeams.length > 0) {
-                    try {
-                        //Referencing newPolioTeam to newAic in the loop and saving aic 
-                        for (let l = 0; l < transitTeams.length; l++) {
-                            console.log("transitTeams block reached")
-                            const teamNo = transitTeams[l]
-                            const teamType = "Transit"
-                            const newPolioTeam = await PolioTeam.create({ teamNo, teamType })
-                            newAic.polioTeams.transitPolioTeams.push(newPolioTeam._id)
-                            await newAic.save()
-                        }
-                    } catch (error) {
-                        return next(new ErrorResponse("Failed to create Transit PolioTeam", 404))
-                    }
-                }
-                // pushing newAic in the loop to foundUC and saving UC 
-                foundUC.polioSubUCs.aic.push(newAic._id)
-                await foundUC.save()
-                i++
-            }
-            return res.status(200).json("Area Incharges and mobile, transit and fixed teams created successfully")
-        } catch (error) {
-            return next(new ErrorResponse("Failed to Generate Polio Micro-Plan", 400))
-        }
-    } else {
-        return res.status(404).json("You are not supervisor of requested UC")
-    }
-}
-
-//SEVENTH ROUTE: Get UC details of logged in user
+//SIXTH ROUTE: Get UC details of logged in user
 export const fetchUC = async (req, res, next) => {
     try {
-        const fetchedUC = await UC.findOne({ supervisor: req.user._id })
-            .populate({
-                path: 'polioSubUCs.aic',
-                model: Aic,
-                populate: {
-                    path: 'polioTeams.mobilePolioTeams polioTeams.fixedPolioTeams polioTeams.transitPolioTeams',
-                    model: PolioTeam,
+        let fetchedUC = await UC.findOne({ supervisor: req.user._id })
+        if (fetchedUC.polioSubUCs.aic.length === 0) {
+            console.log("No aic")
+            res.json(fetchedUC);
+        }
+        if (!fetchedUC.polioSubUCs) {
+            console.log("No polioSubUCs")
+            res.json(fetchedUC);
+        }
+        if (fetchedUC.polioSubUCs.aic.length > 0) {
+            console.log("Aic found")
+            fetchedUC = await UC.findOne({ supervisor: req.user._id })
+                .populate({
+                    path: 'polioSubUCs',
                     populate: {
-                        path: 'polioDays',
-                        model: PolioDay
+                        path: 'aic',
+                        model: Aic,
+                        populate: {
+                            path: 'polioTeams.mobilePolioTeams polioTeams.fixedPolioTeams polioTeams.transitPolioTeams',
+                            model: PolioTeam,
+                            populate: {
+                                path: 'polioDays',
+                                model: PolioDay
+                            }
+                        }
                     }
-                }
-            });
-        res.json(fetchedUC);
+                });
+            console.log(fetchedUC)
+            res.json(fetchedUC);
+        }
     } catch (error) {
-        res.json("No UC Found")
+        return next(new ErrorResponse("Failed to fetch UC details", 404))
     }
 };
 
-//EIGHT ROUTE: Purge Polio Micro-Plan
-export const polioMPPurge = async (req, res, next) => {
-    try {
-        const fetchedUC = await UC.findOne({ supervisor: req.user._id })
-        let i = 0
-        while (i < fetchedUC.polioSubUCs.aic.length) {
-            const fetchedAic = await Aic.findOne({ _id: fetchedUC.polioSubUCs.aic[i] })
-            let j = 0
-            console.log(fetchedAic.polioTeams.mobilePolioTeams.length, fetchedAic.polioTeams.fixedPolioTeams.length, fetchedAic.polioTeams.transitPolioTeams.length)
-            while (j < fetchedAic.polioTeams.mobilePolioTeams.length) {
-                const fetchedPolioTeam = await PolioTeam.findOne({
-                    _id: fetchedAic.polioTeams.mobilePolioTeams[j]
-                })
-                let k = 0
-                while (k < fetchedPolioTeam.polioDays.length) {
-                    await PolioDay.findByIdAndDelete({ _id: fetchedPolioTeam.polioDays[k] })
-                    k++
-                }
-                await PolioTeam.findByIdAndDelete({
-                    _id: fetchedAic.polioTeams.mobilePolioTeams[j]
-                })
-                j++
-            }
-            j = 0
-            if (fetchedAic.polioTeams.fixedPolioTeams.length > 0) {
-                while (j < fetchedAic.polioTeams.fixedPolioTeams.length) {
-                    await PolioTeam.findByIdAndDelete({
-                        _id: fetchedAic.polioTeams.fixedPolioTeams[j]
-                    })
-                    j++
-                }
-            }
-            j = 0
-            if (fetchedAic.polioTeams.transitPolioTeams.length > 0) {
-                while (j < fetchedAic.polioTeams.transitPolioTeams.length) {
-                    await PolioTeam.findByIdAndDelete({
-                        _id: fetchedAic.polioTeams.transitPolioTeams[j]
-                    })
-                    j++
-                }
-            }
-            await Aic.findByIdAndDelete({ _id: fetchedUC.polioSubUCs.aic[i] })
-            i++
-        }
-        fetchedUC.polioSubUCs = []
-        await fetchedUC.save()
-        res.json(fetchedUC);
-    } catch (error) {
-        res.json("Purge Operations Failed")
-    }
-};
