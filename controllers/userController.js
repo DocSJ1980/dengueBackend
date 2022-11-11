@@ -5,6 +5,10 @@ import crypto from 'crypto'
 import sendEmail from "../utils/sendEmail.js"
 import { sendToken } from "../utils/sendToken.js"
 import UC from "../models/ucModel.js"
+import fs from 'fs'
+import path from 'path'
+import csv from 'fast-csv'
+
 
 // New User Registration controller
 export const newUser = async (req, res, next) => {
@@ -87,7 +91,6 @@ export const login = async (req, res, next) => {
 
     try {
         const foundUser = await User.findOne({ email }).select("+password");
-        console.log(foundUser)
         if (!foundUser) {
             return next(new ErrorResponse("Invalid credentials", 401));
         };
@@ -97,11 +100,6 @@ export const login = async (req, res, next) => {
         if (!isMatch) {
             return next(new ErrorResponse("Invalid credentials", 404));
         }
-        // const payload = {
-        //     username: foundUser.username,
-        //     id: foundUser._id,
-        // }
-        // const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
 
         sendToken(res, foundUser, 200, "Login Successful");
 
@@ -273,12 +271,29 @@ export const batchUsers = async (req, res, next) => {
         streamCSV.pipe(csv.parse({ headers: true }))
             .on('error', error => console.error(error))
             .on('data', row => allRecords.push(row))
-            .on('end', rowCount => {
-                console.log(`Parsed ${rowCount} rows`)
+            .on('end', async rowCount => {
+                // console.log(`Parsed ${rowCount} rows`)
+                console.log(allRecords.length)
+                let i = 0
                 try {
-                    const insertedUsers = User.insertMany(allRecords)
-                    return res.status(200).json(`${rowCount} Users have been inserted`)
-                } catch (error) {
+                    // const insertedUsers = await User.insertMany(allRecords)
+                    while (i < rowCount) {
+                        // console.log(allRecords[i])
+                        await User.create({
+                            name: allRecords[i].name,
+                            password: allRecords[i].password,
+                            email: allRecords[i].email,
+                            cnic: allRecords[i].cnic,
+                            contactNo: allRecords[i].contactNo,
+                            verified: allRecords[i].verified
+
+                        })
+                        console.log(`User-${i} created successfully`)
+                        i++
+                    }
+                    return res.status(200).json(`${rowCount} Users created successfully`)
+                }
+                catch (error) {
                     return res.status(404).json("Could not be insted in database")
                 }
             }
@@ -366,7 +381,7 @@ export const setSupervisor = async (req, res, next) => {
                 message: "User not found",
             })
         }
-         else if (!uc) {
+        else if (!uc) {
             return res.status(404).json({
                 success: false,
                 message: "UC not found",
@@ -374,7 +389,7 @@ export const setSupervisor = async (req, res, next) => {
         } else if (superv._id.equals(uc.supervisor)) {
             console.log("super check reached")
             return res.status(404).json({
-                success: false ,
+                success: false,
                 message: `${superv.name} is already supervisor of ${uc.survUC}`
             })
         } else {

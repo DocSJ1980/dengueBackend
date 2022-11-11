@@ -1,9 +1,15 @@
-polioTeamModel
-polioDayModel
-houseModel
-spotModel
+<!-- polioTeamModel -->
+<!-- polioDayModel -->
+<!-- houseModel -->
+<!-- spotModel -->
 issueModel
-polioMPGen route
+<!-- polioMPGen route -->
+<!-- polioMPPurge route -->
+batch create users
+user search regex
+assign user to UC
+assign user to dengueTeam
+assign polioDays to dengueTeam
 Assign Ento, townEnto, ddho
 CRUD endpoints for houseModel with controllers and route
 CRUD endpoints for houseModel with controllers and route

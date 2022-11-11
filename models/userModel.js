@@ -28,6 +28,9 @@ const userSchema = new Schema({
     name: {
         type: String
     },
+    contactNo: {
+        type: Number
+    },
     dob: {
         type: Date
     },
@@ -66,8 +69,7 @@ const userSchema = new Schema({
         },
     ],
     pitbUser: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "PitbUser"
+        type: String
     },
     following: [
         {
