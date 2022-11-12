@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 // Defining User Scheme with mongoose
 const userSchema = new Schema({
     cnic: {
-        type: Number,
+        type: String,
         required: [true, "Please provide your CNIC"]
     },
     email: {
@@ -25,58 +25,45 @@ const userSchema = new Schema({
         minlength: [8, "Password must be at least 8 characters long"],
         select: false,
     },
-    name: {
-        type: String
+    name: { type: String },
+    gender: {
+        type: String,
+        enum: ['Male', 'Female'],
     },
-    contactNo: {
-        type: Number
-    },
-    dob: {
-        type: Date
-    },
-    doj: {
-        type: Date
-    },
-    bps: {
-        type: String
-    },
-    status: {
-        type: String
-    },
+    contactNo: { type: String },
+    dob: { type: Date },
+    doj: { type: Date },
+    bps: { type: String },
+    status: { type: String },
     desig: {
-        type: String
+        type: String,
+        enum: ['Sanitary Patrol', 'Entomologist', 'Public Health Worker']
+    },
+    jobType: {
+        type: String,
+        enum: ['Daily Wages', 'Regular', 'Contract']
     },
     avatar: {
         public_id: String,
         url: String,
     },
-    simpleActivities: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "SimpleActivity"
-        },
-    ],
-    followers: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        },
-    ],
-    uc: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "UC"
-        },
-    ],
-    pitbUser: {
-        type: String
-    },
-    following: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        },
-    ],
+    simpleActivities: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SimpleActivity"
+    }],
+    followers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }],
+    uc: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "UC"
+    }],
+    pitbUser: { type: String },
+    following: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }],
     verified: {
         type: Boolean,
         default: false,

@@ -9,6 +9,9 @@ batch create users
 user search regex
 assign user to UC
 assign user to dengueTeam
+remove user from dengueTeam and add in past members
+remove user from UC
+un-assiged users
 assign polioDays to dengueTeam
 Assign Ento, townEnto, ddho
 CRUD endpoints for houseModel with controllers and route

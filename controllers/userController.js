@@ -10,7 +10,7 @@ import path from 'path'
 import csv from 'fast-csv'
 
 
-// New User Registration controller
+//FIRST ROUTE:  New User Registration controller
 export const newUser = async (req, res, next) => {
     const { name, cnic, email, password } = req.body
     try {
@@ -57,7 +57,7 @@ export const newUser = async (req, res, next) => {
     }
 };
 
-// Email Verification controller
+//SECOND ROUTE: Email Verification controller
 export const verify = async (req, res, next) => {
     try {
         const { otp } = req.body
@@ -81,7 +81,7 @@ export const verify = async (req, res, next) => {
     }
 };
 
-// Login controller
+//THIRD ROUTE: Login controller
 export const login = async (req, res, next) => {
     const { email, password } = req.body;
 
@@ -108,7 +108,7 @@ export const login = async (req, res, next) => {
     }
 };
 
-// Forgot Password controller
+//FOURTH ROUTE: Forgot Password controller
 export const forgotPassword = async (req, res, next) => {
     const { email } = req.body;
 
@@ -145,7 +145,7 @@ export const forgotPassword = async (req, res, next) => {
     }
 }
 
-// Reset Password Controller
+//FIFTH ROUTE: Reset Password Controller
 export const resetPassword = async (req, res, next) => {
     try {
         const { resetOtp, newPassword } = req.body;
@@ -173,7 +173,7 @@ export const resetPassword = async (req, res, next) => {
     }
 };
 
-// Logout Controller
+//SIXTH ROUTE: Logout Controller
 export const logout = async (req, res, next) => {
     try {
         res
@@ -186,7 +186,7 @@ export const logout = async (req, res, next) => {
     }
 };
 
-// Get profile controller
+//SEVENTH ROUTE: Get profile controller
 export const getMyProfile = async (req, res, next) => {
     try {
         const foundUser = await User.findById(req.user._id);
@@ -197,7 +197,7 @@ export const getMyProfile = async (req, res, next) => {
     }
 };
 
-// Update Profile Controller
+//EIGHTH ROUTE: Update Profile Controller
 export const updateProfile = async (req, res, next) => {
     try {
         const foundUser = await User.findById(req.user._id);
@@ -230,7 +230,7 @@ export const updateProfile = async (req, res, next) => {
     }
 };
 
-// Update Password Controller
+//NINTH ROUTE: Update Password Controller
 export const updatePassword = async (req, res, next) => {
     try {
         const foundUser = await User.findById(req.user._id).select("+password");
@@ -262,23 +262,23 @@ export const updatePassword = async (req, res, next) => {
     }
 };
 
-//Batch create Users with CSV file
+//TENTH ROUTE: Batch create Users with CSV file
 export const batchUsers = async (req, res, next) => {
     const allRecords = []
     try {
+        //Using fast-csv to push all records from csvfile into allRecords
         const coolPath = path.join('./', '/public/csv/' + req.file.filename)
         const streamCSV = fs.createReadStream(coolPath)
         streamCSV.pipe(csv.parse({ headers: true }))
             .on('error', error => console.error(error))
             .on('data', row => allRecords.push(row))
             .on('end', async rowCount => {
-                // console.log(`Parsed ${rowCount} rows`)
-                console.log(allRecords.length)
                 let i = 0
+                //Looping through allRecords array and inserting users one by one into database
+                //It takes significant amount of time depending on the number of records
+                //InsertMany records is possible but in this case it is not adviseable to insert many records in one go as it does not hash the passwords
                 try {
-                    // const insertedUsers = await User.insertMany(allRecords)
                     while (i < rowCount) {
-                        // console.log(allRecords[i])
                         await User.create({
                             name: allRecords[i].name,
                             password: allRecords[i].password,
@@ -294,12 +294,53 @@ export const batchUsers = async (req, res, next) => {
                     return res.status(200).json(`${rowCount} Users created successfully`)
                 }
                 catch (error) {
-                    return res.status(404).json("Could not be insted in database")
+                    return res.status(404).json("Users could not be insted in database")
                 }
             }
             );
     } catch (error) {
         return next(new ErrorResponse("Failed to batch create users", 400))
+    }
+}
+
+//ELEVENTH ROUTE: Assign staff to UC
+
+export const assignStaff = async (req, res, next) => {
+    try {
+        const staff = await User.findOne({ _id: req.body.staffID })
+        const foundUC = await UC.findOne({ _id: req.fetchedUC._id })
+        foundUC.currentMembers.push(staff._id)
+        await foundUC.save()
+        return res.status(200).json("Route Working")
+    } catch (e) {
+        return res.status(401).json("Caught an error")
+    }
+}
+
+//TWELVETH ROUTE: Search staff based on multiple fields
+
+export const searchStaff = async (req, res, next) => {
+    try {
+        // if (typeof (req.body.key) === 'string') {
+        console.log("block reached")
+        const staff = await User.find(
+            {
+                $or: [
+                    { name: { $regex: req.params.key, $options: 'i' } },
+                    { cnic: { $regex: req.params.key, $options: 'i' } },
+                    { contactNo: { $regex: req.params.key, $options: 'i' } }
+                ]
+            }
+        ).exec()
+        if (staff) {
+            console.log(staff.length)
+            return res.status(200).json(staff)
+        } else {
+            return res.status(200).json("No user found")
+        }
+        // }
+    } catch (e) {
+        return res.status(401).json("Search Operation Error")
     }
 }
 
@@ -372,7 +413,7 @@ export const getAllActivitiesOfFollowing = async (req, res, next) => {
 export const setSupervisor = async (req, res, next) => {
     const superv = await User.findById(req.body.superID)
     const uc = await UC.findById(req.body.UCID)
-    console.log(superv._id, uc.supervisor)
+
     try {
         console.log("try block reached")
         if (!superv) {
@@ -386,19 +427,30 @@ export const setSupervisor = async (req, res, next) => {
                 success: false,
                 message: "UC not found",
             })
-        } else if (superv._id.equals(uc.supervisor)) {
+        } else if (superv._id.equals(uc.supervisor.currentSuper)) {
             console.log("super check reached")
             return res.status(404).json({
                 success: false,
                 message: `${superv.name} is already supervisor of ${uc.survUC}`
             })
-        } else {
-            console.log("final else reached")
-            uc.supervisor = superv._id
+        } else if (!superv._id.equals(uc.supervisor.currentSuper) && !uc.supervisor.currentSuper) {
+            console.log("Supervisor assign block reached")
+            uc.supervisor.currentSuper = superv._id
             await uc.save()
             res.status(200).json({
                 success: true,
                 message: `${superv.name} assigned as supervisor to ${uc.survUC}`
+            })
+        } else if (!superv._id.equals(uc.supervisor.currentSuper) && uc.supervisor.currentSuper) {
+            console.log("Supervisor replace block reached")
+            const oldSuper1 = await User.findById(uc.supervisor.currentSuper._id)
+            const oldSuper = oldSuper1._id
+            uc.supervisor.pastSuper.push(oldSuper)
+            uc.supervisor.currentSuper = superv._id
+            await uc.save()
+            res.status(200).json({
+                success: true,
+                message: `${superv.name} assigned as supervisor to ${uc.survUC} and ${oldSuper1.name} added to list of past supervisors of ${uc.survUC}`
             })
         }
     }

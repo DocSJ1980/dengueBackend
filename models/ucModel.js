@@ -15,8 +15,18 @@ const ucSchema = new Schema({
   houses: { type: Number },
   spots: { type: Number },
   supervisor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    currentSuper: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    pastSuper:
+      [{
+        oldSuper: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User'
+        },
+        changeDate: { type: Date, default: Date.now }
+      }]
   },
   ento: {
     type: mongoose.Schema.Types.ObjectId,
@@ -30,6 +40,10 @@ const ucSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  currentMembers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   indoorTeams: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'DengueTeam'
@@ -48,5 +62,5 @@ const ucSchema = new Schema({
 },
   { timestamps: true });
 
-const UC = mongoose.model("uc", ucSchema);
-export default UC;
+const UC = mongoose.model("uc", ucSchema)
+export default UC
