@@ -5,9 +5,9 @@
 issueModel
 <!-- polioMPGen route -->
 <!-- polioMPPurge route -->
-batch create users
-user search regex
-assign user to UC
+<!-- batch create users -->
+<!-- user search regex -->
+<!-- assign user to UC -->
 assign user to dengueTeam
 remove user from dengueTeam and add in past members
 remove user from UC

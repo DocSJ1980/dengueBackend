@@ -18,7 +18,8 @@ export const isSuper = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         req.user = await User.findById(decoded._id);
-        req.fetchedUC = await UC.findOne({ supervisor: req.user._id })
+        req.fetchedUC = await UC.findOne({ "supervisor.currentSuper": req.user._id })
+        // console.log(req.fetchedUC)
         if (req.fetchedUC) {
             next()
         } else {

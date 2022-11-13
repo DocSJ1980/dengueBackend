@@ -307,12 +307,33 @@ export const batchUsers = async (req, res, next) => {
 
 export const assignStaff = async (req, res, next) => {
     try {
+        //Simple self explanatory route to assign staff to UC
+        //Only supervisors are able to assign staff to their UCs
         const staff = await User.findOne({ _id: req.body.staffID })
         const foundUC = await UC.findOne({ _id: req.fetchedUC._id })
-        foundUC.currentMembers.push(staff._id)
-        await foundUC.save()
-        return res.status(200).json("Route Working")
-    } catch (e) {
+
+        //Checking if staff is already assigned as team member to a UC or working as supervisor of a UC
+        const checkUC = await UC.findOne({ currentMembers: staff._id })
+        const checkSuper = await UC.findOne({ "supervisor.currentSuper": staff._id })
+
+        //Sending response if staff is already assigned as a team member to a UC
+        if (checkUC) {
+            return res.status(200).json(`${staff.name} is already working as team member in ${checkUC.survUC}`)
+        }
+
+        //Sending response if staff is already assigned as a supervisor to a UC
+        else if (checkSuper) {
+            return res.status(200).json(`${staff.name} is already working as supervisor in ${checkSuper.survUC}`)
+        }
+
+        //Assigning staff to UC and saving it
+        else {
+            foundUC.currentMembers.push(staff._id)
+            await foundUC.save()
+            return res.status(200).json(`${staff.name} is assigned to ${foundUC.survUC} successfully`)
+        }
+    }
+    catch (e) {
         return res.status(401).json("Caught an error")
     }
 }
@@ -321,24 +342,20 @@ export const assignStaff = async (req, res, next) => {
 
 export const searchStaff = async (req, res, next) => {
     try {
-        // if (typeof (req.body.key) === 'string') {
-        console.log("block reached")
-        const staff = await User.find(
-            {
-                $or: [
-                    { name: { $regex: req.params.key, $options: 'i' } },
-                    { cnic: { $regex: req.params.key, $options: 'i' } },
-                    { contactNo: { $regex: req.params.key, $options: 'i' } }
-                ]
-            }
-        ).exec()
+        // Simple route self explanatory
+        // console.log("block reached")
+        const staff = await User.find({
+            $or: [{ name: { $regex: req.params.key, $options: 'i' } },
+            { cnic: { $regex: req.params.key, $options: 'i' } },
+            { contactNo: { $regex: req.params.key, $options: 'i' } }]
+        })
+        //Returning results if found or not found
         if (staff) {
             console.log(staff.length)
             return res.status(200).json(staff)
         } else {
             return res.status(200).json("No user found")
         }
-        // }
     } catch (e) {
         return res.status(401).json("Search Operation Error")
     }
@@ -410,30 +427,37 @@ export const getAllActivitiesOfFollowing = async (req, res, next) => {
     }
 }
 
+//Set Supervisor Route to assign a supervisor to UC 
 export const setSupervisor = async (req, res, next) => {
     const superv = await User.findById(req.body.superID)
     const uc = await UC.findById(req.body.UCID)
 
     try {
-        console.log("try block reached")
+        //Checking if provided ID for the supervisor exists in our user database
+        // console.log("try block reached")
         if (!superv) {
             return res.status(404).json({
                 success: false,
                 message: "User not found",
             })
         }
+        // Checking if provided ID for the UC exists in our UC database
         else if (!uc) {
             return res.status(404).json({
                 success: false,
                 message: "UC not found",
             })
-        } else if (superv._id.equals(uc.supervisor.currentSuper)) {
+        }
+        // Checking if provided ID for the supervisor is already the supervisor of the provided UC
+        else if (superv._id.equals(uc.supervisor.currentSuper)) {
             console.log("super check reached")
             return res.status(404).json({
                 success: false,
                 message: `${superv.name} is already supervisor of ${uc.survUC}`
             })
-        } else if (!superv._id.equals(uc.supervisor.currentSuper) && !uc.supervisor.currentSuper) {
+        }
+        // Assigning the provided ID for the supervisor as supervisor of the provided UC in a condition when there is no already assigned supervisor
+        else if (!superv._id.equals(uc.supervisor.currentSuper) && !uc.supervisor.currentSuper) {
             console.log("Supervisor assign block reached")
             uc.supervisor.currentSuper = superv._id
             await uc.save()
@@ -441,7 +465,10 @@ export const setSupervisor = async (req, res, next) => {
                 success: true,
                 message: `${superv.name} assigned as supervisor to ${uc.survUC}`
             })
-        } else if (!superv._id.equals(uc.supervisor.currentSuper) && uc.supervisor.currentSuper) {
+        }
+        // Assigning the provided ID for the supervisor as supervisor of the provided UC in a condition when there is already assigned supervisor
+        // Already assigned supervisor will be moved to the list of past Supervisors along with the date of change
+        else if (!superv._id.equals(uc.supervisor.currentSuper) && uc.supervisor.currentSuper) {
             console.log("Supervisor replace block reached")
             const oldSuper1 = await User.findById(uc.supervisor.currentSuper._id)
             const oldSuper = oldSuper1._id

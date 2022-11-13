@@ -5,6 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import csv from 'fast-csv'
 import { Aic, PolioTeam, PolioDay } from "../models/polioTeamModel.js"
+import User from "../models/userModel.js"
 
 // import { Url } from "url"
 // const __dirname = new Url('.', import.meta.url).pathname
@@ -116,7 +117,10 @@ export const batchUCs = async (req, res, next) => {
 //SIXTH ROUTE: Get UC details of logged in user
 export const fetchUC = async (req, res, next) => {
     try {
-        let fetchedUC = await UC.findOne({ supervisor: req.user._id })
+        //Finding UC with UC assigned to user as supervisor or UC member
+        let fetchedUC = await UC.findOne({ $or: [{ "supervisor.currentSuper": req.user._id }, { currentMembers: req.user._id }] })
+
+        //Returning UC details if no polio microplan is present
         if (fetchedUC.polioSubUCs.aic.length === 0) {
             console.log("No aic")
             res.json(fetchedUC);
@@ -125,25 +129,25 @@ export const fetchUC = async (req, res, next) => {
             console.log("No polioSubUCs")
             res.json(fetchedUC);
         }
+
+        //Returning UC details if polio microplan is present with completely populated UC
         if (fetchedUC.polioSubUCs.aic.length > 0) {
             console.log("Aic found")
-            fetchedUC = await UC.findOne({ supervisor: req.user._id })
-                .populate({
-                    path: 'polioSubUCs',
+            fetchedUC = await UC.findOne({ $or: [{ "supervisor.currentSuper": req.user._id }, { currentMembers: req.user._id }] }).populate({
+                path: 'polioSubUCs',
+                populate: {
+                    path: 'aic',
+                    model: Aic,
                     populate: {
-                        path: 'aic',
-                        model: Aic,
+                        path: 'polioTeams.mobilePolioTeams polioTeams.fixedPolioTeams polioTeams.transitPolioTeams',
+                        model: PolioTeam,
                         populate: {
-                            path: 'polioTeams.mobilePolioTeams polioTeams.fixedPolioTeams polioTeams.transitPolioTeams',
-                            model: PolioTeam,
-                            populate: {
-                                path: 'polioDays',
-                                model: PolioDay
-                            }
+                            path: 'polioDays',
+                            model: PolioDay
                         }
                     }
-                });
-            console.log(fetchedUC)
+                }
+            }).populate({ path: 'currentMembers', model: User })
             res.json(fetchedUC);
         }
     } catch (error) {
