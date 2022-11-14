@@ -20,7 +20,7 @@ router.post("/verify", isAuthenticated, verify);
 router.get("/me", isAuthenticated, getMyProfile);
 router.post("/updateprofile", isAuthenticated, updateProfile);
 router.post("/updatepassword", isAuthenticated, updatePassword);
-router.post("/batch", isAuthenticated, upload.single('csvFile'), batchUsers)
+router.post("/batch", upload.single('csvFile'), batchUsers)
 router.get("/follow/:id", isAuthenticated, followUser)
 router.put("/setsuper", isAuthenticated, setSupervisor)
 router.post("/setstaff", isSuper, assignStaff)

@@ -29,6 +29,7 @@ const userSchema = new Schema({
     gender: {
         type: String,
         enum: ['Male', 'Female'],
+        required: [true, "Please select a gender"]
     },
     contactNo: { type: String },
     dob: { type: Date },

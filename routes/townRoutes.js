@@ -7,7 +7,7 @@ import { upload } from "../utils/csvUploader.js"
 // Consts (initializing router)
 const router = express.Router()
 
-// User Routes
+// Town Routes
 router.get("/fetchall", isAuthenticated, fetchAllTowns)
 router.post("/batch", isAuthenticated, upload.single('csvFile'), batchTown)
 

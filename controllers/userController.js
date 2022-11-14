@@ -269,6 +269,7 @@ export const batchUsers = async (req, res, next) => {
         //Using fast-csv to push all records from csvfile into allRecords
         const coolPath = path.join('./', '/public/csv/' + req.file.filename)
         const streamCSV = fs.createReadStream(coolPath)
+        console.log(streamCSV)
         streamCSV.pipe(csv.parse({ headers: true }))
             .on('error', error => console.error(error))
             .on('data', row => allRecords.push(row))
@@ -285,7 +286,8 @@ export const batchUsers = async (req, res, next) => {
                             email: allRecords[i].email,
                             cnic: allRecords[i].cnic,
                             contactNo: allRecords[i].contactNo,
-                            verified: allRecords[i].verified
+                            verified: allRecords[i].verified,
+                            gender: allRecords[i].gender
 
                         })
                         console.log(`User-${i} created successfully`)
@@ -431,6 +433,7 @@ export const getAllActivitiesOfFollowing = async (req, res, next) => {
 export const setSupervisor = async (req, res, next) => {
     const superv = await User.findById(req.body.superID)
     const uc = await UC.findById(req.body.UCID)
+    const checkUC = await UC.findOne({ "supervisor.currentSuper": req.body.superID })
 
     try {
         //Checking if provided ID for the supervisor exists in our user database
@@ -448,36 +451,26 @@ export const setSupervisor = async (req, res, next) => {
                 message: "UC not found",
             })
         }
-        // Checking if provided ID for the supervisor is already the supervisor of the provided UC
-        else if (superv._id.equals(uc.supervisor.currentSuper)) {
+        // Checking if provided ID for the supervisor is already the supervisor of the any UC
+        else if (checkUC) {
             console.log("super check reached")
-            return res.status(404).json({
-                success: false,
-                message: `${superv.name} is already supervisor of ${uc.survUC}`
+            return res.status(200).json({
+                success: true,
+                message: `${superv.name} is already supervisor of ${checkUC.survUC}`
             })
         }
-        // Assigning the provided ID for the supervisor as supervisor of the provided UC in a condition when there is no already assigned supervisor
-        else if (!superv._id.equals(uc.supervisor.currentSuper) && !uc.supervisor.currentSuper) {
+        // Assigning the provided ID for the supervisor as supervisor of the provided UC in a condition when there is already assigned supervisor
+        // Already assigned supervisor will be moved to the list of past Supervisors along with the date of change
+        else if (!uc.supervisor.currentSuper) {
             console.log("Supervisor assign block reached")
+            // const oldSuper1 = await User.findById(uc.supervisor.currentSuper._id)
+            // const oldSuper = oldSuper1._id
+            // uc.supervisor.pastSuper.push(oldSuper)
             uc.supervisor.currentSuper = superv._id
             await uc.save()
             res.status(200).json({
                 success: true,
                 message: `${superv.name} assigned as supervisor to ${uc.survUC}`
-            })
-        }
-        // Assigning the provided ID for the supervisor as supervisor of the provided UC in a condition when there is already assigned supervisor
-        // Already assigned supervisor will be moved to the list of past Supervisors along with the date of change
-        else if (!superv._id.equals(uc.supervisor.currentSuper) && uc.supervisor.currentSuper) {
-            console.log("Supervisor replace block reached")
-            const oldSuper1 = await User.findById(uc.supervisor.currentSuper._id)
-            const oldSuper = oldSuper1._id
-            uc.supervisor.pastSuper.push(oldSuper)
-            uc.supervisor.currentSuper = superv._id
-            await uc.save()
-            res.status(200).json({
-                success: true,
-                message: `${superv.name} assigned as supervisor to ${uc.survUC} and ${oldSuper1.name} added to list of past supervisors of ${uc.survUC}`
             })
         }
     }

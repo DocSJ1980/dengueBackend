@@ -8,12 +8,16 @@ issueModel
 <!-- batch create users -->
 <!-- user search regex -->
 <!-- assign user to UC -->
+assign supervisor
+remove supervisor
 assign user to dengueTeam
 remove user from dengueTeam and add in past members
 remove user from UC
 un-assiged users
 assign polioDays to dengueTeam
 Assign Ento, townEnto, ddho
+remove Ento, townEnto, ddho
+find users not assigned to dengueTeams
 CRUD endpoints for houseModel with controllers and route
 CRUD endpoints for houseModel with controllers and route
 dengueTeam assignment route+controller to polio Days
@@ -23,7 +27,7 @@ Logic to attach activities to teams
 Comment system
 Bogus System
 activity endpoints
-
+optimize error codes
 
 
 

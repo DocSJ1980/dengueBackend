@@ -1,23 +1,23 @@
-pitbUser,email,password,name,cnic,jobType,designation,contactNo,verified
-3740565495533,3740565495533@dharawalpindi.tk,12344321, Asif Khan ,3740565495533,Daily Wages,Sanitary Patrol,3335363975,true
-3740536087723,3740536087723@dharawalpindi.tk,12344321, Muhammad Nazeer ,3740536087723,Daily Wages,Sanitary Patrol,3215130464,true
-3740503184367,3740503184367@dharawalpindi.tk,12344321, Raja Muhammad Usman ,3740503184367,Daily Wages,Sanitary Patrol,3151565665,true
-3740502067039,3740502067039@dharawalpindi.tk,12344321, Shahid Abbasi  ,3740502067039,Daily Wages,Sanitary Patrol,3180633356,true
-3740592120369,3740592120369@dharawalpindi.tk,12344321, Touseef Ahmed  ,3740592120369,Daily Wages,Sanitary Patrol,3325743059,true
-3740570549417,3740570549417@dharawalpindi.tk,12344321, Waseem Shahood ,3740570549417,Daily Wages,Sanitary Patrol,3075444636,true
-3740531611966,3740531611966@dharawalpindi.tk,12344321,Humaira shahbaz ,3740531611966,Regular,Sanitary Patrol,0323-8507341,true
-3740598392547,3740598392547@dharawalpindi.tk,12344321,Imran Haider ,3740598392547,Regular,Sanitary Patrol,0333-5339055,true
-3740599319539,3740599319539@dharawalpindi.tk,12344321,Khizar Javed ,3740599319539,Daily Wages,Sanitary Patrol,3459745513,true
-3520231379304,3520231379304@dharawalpindi.tk,12344321,Mst.  Nazia Darveash ,3520231379304,Daily Wages,Sanitary Patrol,3335363975,true
-3720382516310,3720382516310@dharawalpindi.tk,12344321,Mst.  Saira Gull ,3720382516310,Daily Wages,Sanitary Patrol,3070959196,true
-3740579775804,3740579775804@dharawalpindi.tk,12344321,Mst. �yesha Nazeer,3740579775804,Daily Wages,Sanitary Patrol,3320951310,true
-3740550295965,3740550295965@dharawalpindi.tk,12344321,Muhammad Nasir Iqbal ,3740550295965,Regular,Sanitary Patrol,0341-5330632,true
-3740576587475,3740576587475@dharawalpindi.tk,12344321,Muhammad Umar Farooq ,3740576587475,Regular,Sanitary Patrol,0315-5172852,true
+pitbUser,email,password,name,cnic,jobType,designation,contactNo,verified,gender
+3740565495533,3740565495533@dharawalpindi.tk,12344321, Asif Khan ,3740565495533,Daily Wages,Sanitary Patrol,3335363975,true,Male
+3740536087723,3740536087723@dharawalpindi.tk,12344321, Muhammad Nazeer ,3740536087723,Daily Wages,Sanitary Patrol,3215130464,true,Male
+3740503184367,3740503184367@dharawalpindi.tk,12344321, Raja Muhammad Usman ,3740503184367,Daily Wages,Sanitary Patrol,3151565665,true,Male
+3740502067039,3740502067039@dharawalpindi.tk,12344321, Shahid Abbasi  ,3740502067039,Daily Wages,Sanitary Patrol,3180633356,true,Male
+3740592120369,3740592120369@dharawalpindi.tk,12344321, Touseef Ahmed  ,3740592120369,Daily Wages,Sanitary Patrol,3325743059,true,Male
+3740570549417,3740570549417@dharawalpindi.tk,12344321, Waseem Shahood ,3740570549417,Daily Wages,Sanitary Patrol,3075444636,true,Male
+3740531611966,3740531611966@dharawalpindi.tk,12344321,Humaira shahbaz ,3740531611966,Regular,Sanitary Patrol,0323-8507341,true,Female
+3740598392547,3740598392547@dharawalpindi.tk,12344321,Imran Haider ,3740598392547,Regular,Sanitary Patrol,0333-5339055,true,Male
+3740599319539,3740599319539@dharawalpindi.tk,12344321,Khizar Javed ,3740599319539,Daily Wages,Sanitary Patrol,3459745513,true,Male
+3520231379304,3520231379304@dharawalpindi.tk,12344321,Mst.  Nazia Darveash ,3520231379304,Daily Wages,Sanitary Patrol,3335363975,true,Female
+3720382516310,3720382516310@dharawalpindi.tk,12344321,Mst.  Saira Gull ,3720382516310,Daily Wages,Sanitary Patrol,3070959196,true,Female
+3740579775804,3740579775804@dharawalpindi.tk,12344321,Mst. Ayesha Nazeer,3740579775804,Daily Wages,Sanitary Patrol,3320951310,true,Female
+3740550295965,3740550295965@dharawalpindi.tk,12344321,Muhammad Nasir Iqbal ,3740550295965,Regular,Sanitary Patrol,0341-5330632,true,Male
+3740576587475,3740576587475@dharawalpindi.tk,12344321,Muhammad Umar Farooq ,3740576587475,Regular,Sanitary Patrol,0315-5172852,true,Male
 3740544158826,3740544158826@dharawalpindi.tk,12344321,Nazmeen Zulifqar,3740544158826,Regular,Sanitary Patrol,"0311-5532381
-0314-5086868",true
-3740565707879,3740565707879@dharawalpindi.tk,12344321,Riaz Ramzan ,3740565707879,Regular,Sanitary Patrol,0332-5337926,true
-3740312957314,3740312957314@dharawalpindi.tk,12344321,Sadia Kousar ,3740312957314,Regular,Sanitary Patrol,0349-5482581,true
-3740335215812,3740335215812@dharawalpindi.tk,12344321,Samabia Irum ,3740335215812,Regular,Sanitary Patrol,0348-0527308,true
-3740543439795,3740543439795@dharawalpindi.tk,12344321,Zahid Hussain Janjua ,3740543439795,Daily Wages,Sanitary Patrol,3470539935,true
-3730108133504,3730108133504@dharawalpindi.tk,12344321,Siddiqa Kosar ,3730108133504,Regular,Sanitary Patrol,0342-5524252,true
-3740579511175,3740579511175@dharawalpindi.tk,12344321,Muhammad Rafiq ,3740579511175,Regular,Sanitary Patrol,0323-5282228,true
+0314-5086868",true,Male
+3740565707879,3740565707879@dharawalpindi.tk,12344321,Riaz Ramzan ,3740565707879,Regular,Sanitary Patrol,0332-5337926,true,Male
+3740312957314,3740312957314@dharawalpindi.tk,12344321,Sadia Kousar ,3740312957314,Regular,Sanitary Patrol,0349-5482581,true,Female
+3740335215812,3740335215812@dharawalpindi.tk,12344321,Samabia Irum ,3740335215812,Regular,Sanitary Patrol,0348-0527308,true,Female
+3740543439795,3740543439795@dharawalpindi.tk,12344321,Zahid Hussain Janjua ,3740543439795,Daily Wages,Sanitary Patrol,3470539935,true,Male
+3730108133504,3730108133504@dharawalpindi.tk,12344321,Siddiqa Kosar ,3730108133504,Regular,Sanitary Patrol,0342-5524252,true,Female
+3740579511175,3740579511175@dharawalpindi.tk,12344321,Muhammad Rafiq ,3740579511175,Regular,Sanitary Patrol,0323-5282228,true,Male
