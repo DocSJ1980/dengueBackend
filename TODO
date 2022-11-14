@@ -8,12 +8,13 @@ issueModel
 <!-- batch create users -->
 <!-- user search regex -->
 <!-- assign user to UC -->
+<!-- assign user to UC -->
+<!-- remove user from UC -->
+<!-- un-assiged users -->
 assign supervisor
 remove supervisor
 assign user to dengueTeam
 remove user from dengueTeam and add in past members
-remove user from UC
-un-assiged users
 assign polioDays to dengueTeam
 Assign Ento, townEnto, ddho
 remove Ento, townEnto, ddho

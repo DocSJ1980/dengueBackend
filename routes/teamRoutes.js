@@ -9,8 +9,8 @@ import { isSuper } from "../middleware/superAuth.js"
 const router = express.Router()
 
 // Dengue Routes
-router.post("/dtcreate", isSuper, dtCreate)
-router.post("/poliompgen", isAuthenticated, polioMPGen)
+router.get("/dtcreate", isSuper, dtCreate)
+router.put("/poliompgen", isAuthenticated, polioMPGen)
 router.get("/poliomppurge", isAuthenticated, polioMPPurge)
 
 
