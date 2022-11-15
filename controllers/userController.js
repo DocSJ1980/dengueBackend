@@ -8,6 +8,7 @@ import UC from "../models/ucModel.js"
 import fs from 'fs'
 import path from 'path'
 import csv from 'fast-csv'
+import DengueTeam from "../models/dengueTeamModel.js"
 
 
 //FIRST ROUTE:  New User Registration controller
@@ -305,8 +306,8 @@ export const batchUsers = async (req, res, next) => {
     }
 }
 
-//ELEVENTH ROUTE: Set Supervisor Route to assign a supervisor to UC 
-export const setSupervisor = async (req, res, next) => {
+//11TH ROUTE: Set Supervisor Route to assign a supervisor to UC 
+export const setSuper = async (req, res, next) => {
     const superv = await User.findById(req.body.superID)
     const uc = await UC.findById(req.body.UCID)
     const checkUC = await UC.findOne({ "supervisor.currentSuper": req.body.superID })
@@ -355,7 +356,40 @@ export const setSupervisor = async (req, res, next) => {
     }
 }
 
-//TWELVETH ROUTE: Search staff based on multiple fields
+//.12TH ROUTE: Set Supervisor Route to assign a supervisor to UC 
+export const removeSuper = async (req, res, next) => {
+    const superv = await User.findById(req.body.superID)
+    const checkUC = await UC.findOne({ "supervisor.currentSuper": req.body.superID })
+
+    try {
+        //* Checking if provided ID for the supervisor exists in our user database
+        //* console.log("try block reached")
+        if (!superv) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        //* Removing the provided ID for the supervisor from supervisorship of the already assigned UC in he is already assigned supervisor
+        //* Already assigned supervisor will be moved to the list of past Supervisors along with the date of change
+        else if (checkUC) {
+            // console.log("Supervisor assign block reached")
+            const oldSuper = superv._id
+            checkUC.supervisor.pastSuper.push(oldSuper)
+            checkUC.supervisor.currentSuper = null
+            await checkUC.save()
+            res.status(200).json({
+                success: true,
+                message: `${superv.name} removed from supervisorship of ${checkUC.survUC}`
+            })
+        }
+    }
+    catch (err) {
+        return next(new ErrorResponse(`Operation failed`, 400))
+    }
+}
+
+//.12TH ROUTE: Search staff based on multiple fields
 export const searchStaff = async (req, res, next) => {
     try {
         // Simple route self explanatory
@@ -377,7 +411,7 @@ export const searchStaff = async (req, res, next) => {
     }
 }
 
-//THIRTEENTH ROUTE: Assign staff to UC
+//13TH ROUTE: Assign staff to UC
 export const assignStaff = async (req, res, next) => {
     try {
         //Simple self explanatory route to assign staff to UC
@@ -385,18 +419,27 @@ export const assignStaff = async (req, res, next) => {
         const staff = await User.findOne({ _id: req.body.staffID })
         const foundUC = await UC.findOne({ _id: req.fetchedUC._id })
 
+        //Check if user is already assigned to a dengueTeam or not. if yes then first remove from there
+        const checkDT = await DengueTeam.findOne({ currentMembers: staff._id })
+        const checkDTUC = await UC.findOne({ $or: [{ indoorTeams: checkDT._id }, { outdoorTeams: checkDT._id }] })
+
         //Checking if staff is already assigned as team member to a UC or working as supervisor of a UC
         const checkUC = await UC.findOne({ currentMembers: staff._id })
         const checkSuper = await UC.findOne({ "supervisor.currentSuper": staff._id })
 
+        //Checking if staff is working in any dengue team
+        if (checkDT) {
+            return res.status(200).json(`${staff.name} cannot be removed as already working in ${checkDT.teamType} of ${checkDTUC.survUC}. Please remove from dengue team first`)
+        }
+
         //Sending response if staff is already assigned as a team member to a UC
-        if (checkUC) {
+        else if (checkUC) {
             return res.status(200).json(`${staff.name} is already working as team member in ${checkUC.survUC}. Please remove to assign to ${foundUC.survUC}`)
         }
 
         //Sending response if staff is already assigned as a supervisor to a UC
         else if (checkSuper) {
-            return res.status(200).json(`${staff.name} is already working as supervisor in ${checkSuper.survUC}. Please remove to assign as team member to ${foundUC.survUC}`)
+            return res.status(200).json(`${staff.name} is already working as supervisor in ${checkSuper.survUC}. Please remove from supervisorship, to assign as team member to ${foundUC.survUC}`)
         }
 
         //Assigning staff to UC and saving it
@@ -411,13 +454,18 @@ export const assignStaff = async (req, res, next) => {
     }
 }
 
-//THIRTEENTH ROUTE: Remove staff from UC
+//14TH ROUTE: Remove staff from UC
 export const removeStaff = async (req, res, next) => {
     try {
         //Simple self explanatory route to remove staff from UC
         //Only supervisors are able to remove staff from their UCs
         const staff = await User.findOne({ _id: req.body.staffID })
         const foundUC = await UC.findOne({ _id: req.fetchedUC._id })
+        // console.log(foundUC.survUC, staff.name)
+        //Check if user is already assigned to a dengueTeam or not. if yes then first remove from there
+        const checkDT = await DengueTeam.findOne({ currentMembers: staff._id })
+        const checkDTUC = await UC.findOne({ $or: [{ indoorTeams: checkDT._id }, { outdoorTeams: checkDT._id }] })
+        // console.log(checkDT)
 
         //function for removing staff from UC
         function removeItemOnce(arr, value) {
@@ -428,11 +476,16 @@ export const removeStaff = async (req, res, next) => {
             return arr;
         }
 
+        //Checking if staff is working in any dengue team
+        if (checkDT) {
+            return res.status(200).json(`${staff.name} cannot be assigned to ${foundUC.survUC} as already working in ${checkDT.teamType} of ${checkDTUC.survUC}. Please remove from dengue team first`)
+        }
+
         //Removing staff from currentMembers of UC, saving the UC and sending success response
-        if (foundUC.currentMembers.includes(staff._id)) {
-            console.log(foundUC.currentMembers)
+        else if (foundUC.currentMembers.includes(staff._id)) {
+            // console.log(foundUC.currentMembers)
             foundUC.currentMembers = removeItemOnce(foundUC.currentMembers, staff._id)
-            console.log(foundUC.currentMembers)
+            // console.log(foundUC.currentMembers)
             await foundUC.save()
             return res.status(200).json(`${staff.name} is removed from ${foundUC.survUC} successfully`)
         } else {

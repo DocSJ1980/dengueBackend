@@ -17,20 +17,11 @@ const dengueTeamSchema = new Schema({
         // maxItems: 2
     }],
     pastMembers: [{
-        memberDetail: {
+        oldMember: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        dateTransferredIn: { type: Date },
-        transferredFrom: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'UC'
-        },
-        dateTransferredOut: { type: Date },
-        transferredTo: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'UC'
-        },
+        changeDate: { type: Date, default: Date.now }
     }],
 },
     { timestamps: true })

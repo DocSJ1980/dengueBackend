@@ -5,6 +5,7 @@ import User from "../models/userModel.js";
 export const isSuper = async (req, res, next) => {
 
     try {
+        // console.log("isSuper try block reached")
         const { token } = req.cookies;
         if (!token) {
             return res.status(401).json(

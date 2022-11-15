@@ -53,3 +53,107 @@ export const dtCreate = async (req, res, next) => {
         return next(new ErrorResponse(`${uc.indoorTeams.length} Indoor teams and ${uc.outdoorTeams.length} Outdoor teams are already present in UC`, 400))
     }
 }
+
+//. 2nd ROUTE: Assign staff to dengueTeam
+export const assignStaffDT = async (req, res, next) => {
+    try {
+        // console.log('Request received')
+        //* Simple self explanatory route to assign staff to dengue team in UC
+        //*Only supervisors are able to assign staff to their UCs
+        const staff = await User.findOne({ _id: req.body.staffID })
+        // console.log(staff.name)
+        const foundUC = await UC.findOne({ _id: req.fetchedUC._id })
+        // console.log(foundUC.survUC)
+        const dengueTeam = await DengueTeam.findById(req.body.dtID)
+        // console.log(dengueTeam.teamType)
+        const checkUC = await UC.findOne({ currentMembers: staff._id })
+        // console.log(checkUC.survUC)
+        const checkDT = await DengueTeam.findOne({ currentMembers: staff._id })
+        // console.log(checkDT)
+
+        //*Checking if staff is working in any dengue team
+        if (checkDT) {
+            // console.log('Check assigned to dengueTeam block reached')
+            const checkDTUC = await UC.findOne({ $or: [{ indoorTeams: checkDT._id }, { outdoorTeams: checkDT._id }] })
+            // console.log(checkDTUC.survUC)
+            return res.status(200).json(`${staff.name} cannot be assigned to ${dengueTeam.teamType} Dengue team in ${foundUC.survUC} as already working in ${checkDT.teamType} of ${checkDTUC.survUC}`)
+        }
+
+        //*Checing if staff belongs to requesting supervisor's UC
+        else if (checkUC._id.equals(foundUC._id)) {
+            // console.log('Verification block for supervisors UC and staff UC reached')
+
+            //*Checking male members are being assigned to outdoor and female staff members are being assigned to indoor teams
+            if (staff.gender === 'Male' && dengueTeam.teamType === 'Indoor') {
+                // console.log('Male : Indoor block reached');
+                return res.status(200).json(`${staff.name} is Male and cannot be assigned to Indoor team`)
+            } else if (staff.gender === 'Female' && dengueTeam.teamType === 'Outdoor') {
+                // console.log('Female : Outdoor block reached');
+                return res.status(200).json(`${staff.name} is Female and cannot be assigned to Outdoor team`)
+            }
+
+            //*Checking if there is space available in the dengueTeam
+            else if (dengueTeam.currentMembers.length >= 2) {
+                // console.log('Number of teamMembers check block reached');
+                return res.status(200).json(`${staff.name} cannot be assigned to ${dengueTeam.teamType} Dengue team in ${foundUC.survUC} as already two members are assigned`)
+            }
+
+            //*Finally adding staff to dengueTeam
+            else if (dengueTeam.currentMembers.length < 2) {
+                // console.log('Final block for assigning staff to dengueTeam reached');
+                dengueTeam.currentMembers.push(staff._id)
+                await dengueTeam.save()
+                return res.status(200).json(`${staff.name} is successfully assigned to ${dengueTeam.teamType} Dengue team in ${foundUC.survUC}`)
+            }
+        }
+    }
+    catch (e) {
+        return res.status(401).json("Caught an error")
+    }
+}
+
+//.2nd ROUTE: Assign staff to dengueTeam
+export const removeStaffDT = async (req, res, next) => {
+    try {
+        //* Simple self explanatory route to assign staff to dengue team in UC
+        //* Only supervisors are able to assign staff to their UCs
+        const staff = await User.findOne({ _id: req.body.staffID })
+        const foundUC = await UC.findOne({ _id: req.fetchedUC._id })
+        const dengueTeam = await DengueTeam.findById(req.body.dtID)
+        const checkUC = await UC.findOne({ currentMembers: staff._id })
+        const checkDT = await DengueTeam.findOne({ currentMembers: staff._id })
+        // console.log(checkDT.teamType)
+
+
+        //* Checking if staff is working in any dengue team
+        if (!checkUC._id.equals(foundUC._id)) {
+            // console.log('Staff is not working in the requested dengue team');
+            const checkDTUC = await UC.findOne({ $or: [{ indoorTeams: checkDT._id }, { outdoorTeams: checkDT._id }] })
+            return res.status(200).json(`${staff.name} cannot be removed from ${dengueTeam.teamType} Dengue team in ${foundUC.survUC} as already working in ${checkDT.teamType} dengue team of ${checkDTUC.survUC}`)
+        }
+        //* Checing if staff belongs to requesting supervisor's UC
+        else if (checkUC._id.equals(foundUC._id) && dengueTeam._id.equals(checkDT._id)) {
+            // console.log('Final block for removing staff from dengueTeam reached');
+            const oldMember = staff._id
+            dengueTeam.pastMembers.push(oldMember)
+            dengueTeam.currentMembers = removeItemOnce(dengueTeam.currentMembers, staff._id)
+            await dengueTeam.save()
+            return res.status(200).json(`${staff.name} is successfully removed from ${dengueTeam.teamType} Dengue team in ${foundUC.survUC}`)
+        }
+    }
+    catch (e) {
+        return res.status(401).json("Caught an error")
+    }
+}
+
+
+
+
+//*function for removing value from array
+function removeItemOnce(arr, value) {
+    var index = arr.indexOf(value);
+    if (index > -1) {
+        arr.splice(index, 1);
+    }
+    return arr;
+}

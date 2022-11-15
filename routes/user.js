@@ -1,6 +1,6 @@
 // Imports (express, named imports from userControlller)
 import express from "express"
-import { login, newUser, forgotPassword, resetPassword, verify, logout, getMyProfile, updateProfile, updatePassword, batchUsers, followUser, setSupervisor, assignStaff, searchStaff, removeStaff } from "../controllers/userController.js"
+import { login, newUser, forgotPassword, resetPassword, verify, logout, getMyProfile, updateProfile, updatePassword, batchUsers, followUser, assignStaff, searchStaff, removeStaff, setSuper, removeSuper } from "../controllers/userController.js"
 import { isAuthenticated } from "../middleware/auth.js";
 import { isSuper } from "../middleware/superAuth.js";
 import { upload } from "../utils/csvUploader.js"
@@ -22,9 +22,10 @@ router.post("/updateprofile", isAuthenticated, updateProfile);
 router.post("/updatepassword", isAuthenticated, updatePassword);
 router.post("/batch", upload.single('csvFile'), batchUsers)
 router.get("/follow/:id", isAuthenticated, followUser)
-router.put("/setsuper", isAuthenticated, setSupervisor)
+router.put("/setsuper", isAuthenticated, setSuper)
+router.put("/removesuper", isAuthenticated, removeSuper)
 router.put("/setstaff", isSuper, assignStaff)
-router.patch("/removestaff", isSuper, removeStaff)
+router.put("/removestaff", isSuper, removeStaff)
 router.get("/staff/:key", isAuthenticated, searchStaff)
 
 
