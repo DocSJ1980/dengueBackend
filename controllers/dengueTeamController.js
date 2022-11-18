@@ -4,11 +4,12 @@ import UC from "../models/ucModel.js"
 import ErrorResponse from "../utils/Error.js"
 import User from "../models/userModel.js"
 import mongoose from "mongoose"
+import { Aic, PolioDay, PolioTeam } from "../models/polioTeamModel.js"
 
 
-//FIRST ROUTE: Create indoor and outdoor dengueTeams based on the number of MSPs and FSPs assigned to the UC
+//. 1st ROUTE: Create indoor and outdoor dengueTeams based on the number of MSPs and FSPs assigned to the UC
 export const dtCreate = async (req, res, next) => {
-    //Getting the number of MSPs and FSPs and calculating the number of indoor and outdoor dengueTeams to create
+    //* Getting the number of MSPs and FSPs and calculating the number of indoor and outdoor dengueTeams to create
     const uc = await UC.findById(req.fetchedUC._id).populate({ path: 'currentMembers', model: User })
     const totalStaff = uc.currentMembers
     const fsp = totalStaff.filter(staff => staff.gender === 'Female')
@@ -16,14 +17,14 @@ export const dtCreate = async (req, res, next) => {
     const indoorTeamNum = Math.floor(fsp.length / 2)
     const outdoorTeamNum = Math.floor(msp.length / 2)
 
-    //Creating indoor dengueTeams based on the calculated numbers
-    //Indoor and outdoor teams will be created only if there are already no created teams
+    //* Creating indoor dengueTeams based on the calculated numbers
+    //* Indoor and outdoor teams will be created only if there are already no created teams
     if (uc.indoorTeams.length === 0 && uc.outdoorTeams.length === 0) {
         try {
             let indoorIndex = 1
             let outdoorIndex = 1
             try {
-                //Loop for creating indoor teams and logging their IDs in the UC
+                //* Loop for creating indoor teams and logging their IDs in the UC
                 while (indoorIndex <= indoorTeamNum) {
                     const teamType = "Indoor"
                     const teamNo = indoorIndex
@@ -32,7 +33,7 @@ export const dtCreate = async (req, res, next) => {
                     await uc.save()
                     indoorIndex++
                 }
-                //Loop for creating outdoor teams and logging their IDs in the UC
+                //* Loop for creating outdoor teams and logging their IDs in the UC
                 while (outdoorIndex <= outdoorTeamNum) {
                     const teamType = "Outdoor"
                     const teamNo = outdoorIndex
@@ -42,7 +43,7 @@ export const dtCreate = async (req, res, next) => {
                     outdoorIndex++
                 }
             } finally {
-                //Returning the response after complete creation of dengue teams and insertion into UC 
+                //* Returning the response after complete creation of dengue teams and insertion into UC 
                 return res.status(200).json(`${indoorIndex - 1} Indoor and ${outdoorIndex - 1} Outdoor Teams have been inserted`)
             }
         }
@@ -112,7 +113,7 @@ export const assignStaffDT = async (req, res, next) => {
     }
 }
 
-//.2nd ROUTE: Assign staff to dengueTeam
+//. 3rd ROUTE: Remove staff to dengueTeam
 export const removeStaffDT = async (req, res, next) => {
     try {
         //* Simple self explanatory route to assign staff to dengue team in UC
@@ -139,6 +140,68 @@ export const removeStaffDT = async (req, res, next) => {
             dengueTeam.currentMembers = removeItemOnce(dengueTeam.currentMembers, staff._id)
             await dengueTeam.save()
             return res.status(200).json(`${staff.name} is successfully removed from ${dengueTeam.teamType} Dengue team in ${foundUC.survUC}`)
+        }
+    }
+    catch (e) {
+        return res.status(401).json("Caught an error")
+    }
+}
+
+//. 4th ROUTE: Assign polioDay to dengueTeam
+export const assignPolioDay = async (req, res, next) => {
+    try {
+        console.log('Request received')
+        //* Simple self explanatory route to assign staff to dengue team in UC
+        //*Only supervisors are able to assign staff to their UCs
+        const polioDay = await PolioDay.findOne({ _id: req.body.polioDayID })
+        // console.log(polioDay.dayNo)
+        const dengueTeam = await DengueTeam.findById(req.body.dtID)
+        // console.log(dengueTeam.teamType)
+        const foundUC = await UC.findOne({ _id: req.fetchedUC._id })
+        // console.log(foundUC.survUC)
+        const polioTeam = await PolioTeam.findOne({ $in: { polioDays: polioDay._id } })
+        // console.log(polioTeam.teamType)
+        const checkAic = await Aic.findOne({ "polioTeams.mobilePolioTeams": polioTeam._id })
+        // console.log(checkAic.aicNumber)
+        const checkUC = await UC.findOne({ "polioSubUCs.aic": checkAic._id })
+        // console.log(checkUC.survUC)
+        const checkPolioDayIndoor = await PolioDay.findOne({ "assignedDengueTeam.currentIndoorDT": req.body.dtID })
+        // console.log(checkPolioDayIndoor.dayNo)
+        const checkPolioDayOutdoor = await PolioDay.findOne({ "assignedDengueTeam.currentOutdoorDT": req.body.dtID })
+        // console.log(checkPolioDayOutdoor.dayNo)
+
+        //* Checing if UC of polio Day is assigned to any dengue team
+        if (checkUC._id.equals(foundUC._id)
+            && polioDay.assignedDengueTeam.currentIndoorDT
+            && dengueTeam.teamType === "Indoor") {
+            console.log('Check for assigned indoor dengueTeam block reached')
+            return res.status(200).json(`Polio Day-${polioDay.dayNo} of Polio Team-${polioTeam.teamNo} is already assigned to another Indoor dengue team. Please remove`)
+        }
+        else if (checkUC._id.equals(foundUC._id)
+            && polioDay.assignedDengueTeam.currentOutdoorDT
+            && dengueTeam.teamType === "Outdoor") {
+            console.log('Check for assigned Outdoor dengueTeam block reached')
+            return res.status(200).json(`Polio Day-${polioDay.dayNo} of Polio Team-${polioTeam.teamNo} is already assigned to another Outdoor dengue team. Please remove`)
+        }
+
+        //* Checing if UC of requested polio Day is same as that of assigning supervisor
+        else if (checkUC._id.equals(foundUC._id)
+            && !polioDay.assignedDengueTeam.currentIndoorDT
+            && !checkPolioDayIndoor
+            && dengueTeam.teamType === "Indoor") {
+            console.log('Final assignment indoor dengueTeam to polioDay reached')
+            polioDay.assignedDengueTeam.currentIndoorDT = dengueTeam._id
+            await polioDay.save()
+            return res.status(200).json(`Polio Day-${polioDay.dayNo} of Polio Team-${polioTeam.teamNo} is successfully assigned to ${dengueTeam.teamType} Dengue team-${dengueTeam.teamNo} in ${foundUC.survUC}`)
+        }
+        else if (checkUC._id.equals(foundUC._id)
+            && !polioDay.assignedDengueTeam.currentOutdoorDT
+            && !checkPolioDayOutdoor
+            && dengueTeam.teamType === "Outdoor") {
+            console.log('Final assignment outdoor dengueTeam to polioDay reached')
+            polioDay.assignedDengueTeam.currentOutdoorDT = dengueTeam._id
+            await polioDay.save()
+            return res.status(200).json(`Polio Day-${polioDay.dayNo} of Polio Team-${polioTeam.teamNo} is successfully assigned to ${dengueTeam.teamType} Dengue team-${dengueTeam.teamNo} in ${foundUC.survUC}`)
         }
     }
     catch (e) {

@@ -54,8 +54,29 @@ const polioDay = new Schema({
     endingImg: { type: String },
     wayPointImgs: [{ type: String }],
     assignedDengueTeam: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'House'
+        currentIndoorDT: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'DengueTeam'
+        },
+        pastIndoorDTs: [{
+            oldIndoorDTs: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'DengueTeam'
+            },
+            changeDate: { type: Date, default: Date.now }
+        }],
+        currentOutdoorDT: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'DengueTeam'
+        },
+        pastOutdoorDTs: [{
+            oldOutdoorDTs: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'DengueTeam'
+            },
+            changeDate: { type: Date, default: Date.now }
+        }]
+
     },
     street: [{
         address: { type: String, required: true },
