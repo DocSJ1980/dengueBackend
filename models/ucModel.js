@@ -29,16 +29,46 @@ const ucSchema = new Schema({
       }]
   },
   ento: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    currentEnto: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    pastEntos:
+      [{
+        oldEnto: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User'
+        },
+        changeDate: { type: Date, default: Date.now }
+      }]
   },
   townEnto: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    currentTownEnto: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    pastTownEnto:
+      [{
+        oldSuper: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User'
+        },
+        changeDate: { type: Date, default: Date.now }
+      }]
   },
   ddho: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    currentDdho: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    pastDdho:
+      [{
+        oldSuper: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User'
+        },
+        changeDate: { type: Date, default: Date.now }
+      }]
   },
   currentMembers: [{
     type: mongoose.Schema.Types.ObjectId,

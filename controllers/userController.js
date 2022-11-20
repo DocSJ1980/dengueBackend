@@ -13,7 +13,7 @@ import DengueTeam from "../models/dengueTeamModel.js"
 
 //FIRST ROUTE:  New User Registration controller
 export const newUser = async (req, res, next) => {
-    const { name, cnic, email, password } = req.body
+    const { name, cnic, email, password, gender, desig, jobType } = req.body
     try {
         // const { avatar } = req.files;
         let foundUser = await User.findOne({ cnic })
@@ -37,6 +37,7 @@ export const newUser = async (req, res, next) => {
                 public_id: "",
                 url: ""
             },
+            gender, desig, jobType,
             otp,
             otp_expiry: Date.now() + process.env.OTP_EXPIRE * 60 * 60 * 1000
         });
@@ -306,7 +307,7 @@ export const batchUsers = async (req, res, next) => {
     }
 }
 
-//11TH ROUTE: Set Supervisor Route to assign a supervisor to UC 
+//. 11TH ROUTE: Set Supervisor Route to assign a supervisor to UC 
 export const setSuper = async (req, res, next) => {
     const superv = await User.findById(req.body.superID)
     const uc = await UC.findById(req.body.UCID)
@@ -356,7 +357,7 @@ export const setSuper = async (req, res, next) => {
     }
 }
 
-//.12TH ROUTE: Set Supervisor Route to assign a supervisor to UC 
+//. 12TH ROUTE: Remove Supervisor Route to remove a supervisor from UC 
 export const removeSuper = async (req, res, next) => {
     const superv = await User.findById(req.body.superID)
     const checkUC = await UC.findOne({ "supervisor.currentSuper": req.body.superID })
@@ -494,6 +495,121 @@ export const removeStaff = async (req, res, next) => {
     }
     catch (e) {
         return res.status(401).json("Operation not successful")
+    }
+}
+
+//. 11TH ROUTE: Set Entomoligist Route to assign an entomologist to UC 
+export const setEnto = async (req, res, next) => {
+    const ento = await User.findById(req.body.entoID)
+    const uc = await UC.findById(req.body.UCID)
+
+    try {
+        //* Checking if provided ID for the entomologist exists in our user database
+        // console.log("try block reached")
+        if (!ento) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        //* Checking if provided ID for the UC exists in our UC database
+        else if (!uc) {
+            return res.status(404).json({
+                success: false,
+                message: "UC not found",
+            })
+        }
+        //* Checking if requested user is an entomologist or not
+        else if (ento.desig != "Entomologist") {
+            console.log(`${ento.name} is not entomologist and cannot be assigned as entomologist of UC: ${uc.survUC}. Please assign to an  appropriate staff.`)
+            res.status(200).json({
+                success: true,
+                message: `Sorry ${ento.name} is not entomologist and cannot be assigned as entomologist of UC: ${uc.survUC}. Please assign to an  appropriate staff.`
+            })
+        }
+        else if (ento.desig === "Entomologist") {
+            //* Checking if an ento is already assigned or not
+            if (uc.ento.currentEnto) {
+                const alreadyEnto = await User.findById(uc.ento.currentEnto)
+                console.log(`${alreadyEnto.name} is already Assigned as entomologist of UC: ${uc.survUC}. Please release`)
+                res.status(200).json({
+                    success: true,
+                    message: `Sorry ${ento.name}cannot be assigned as entomologist of UC: ${uc.survUC}.  ${alreadyEnto.name} is already Assigned as entomologist, Please release`
+                })
+            }
+            //* Assigning the provided ID for the entomolgist as entomologist of the provided UC
+            else if (!uc.ento.currentEnto) {
+                console.log("Entomologist assign block reached")
+                uc.ento.currentEnto = ento._id
+                await uc.save()
+                res.status(200).json({
+                    success: true,
+                    message: `${ento.name} assigned as supervisor to ${uc.survUC}`
+                })
+            }
+        }
+    }
+    catch (err) {
+        return next(new ErrorResponse(`Failed to set ${ento.name} as entomologist of ${uc.survUC}`, 400))
+    }
+}
+
+//. 12TH ROUTE: Remove Entomologist Route to remove Entomologist from UC 
+//! TODO Build the function below
+export const removeEnto = async (req, res, next) => {
+    const ento = await User.findById(req.body.entoID)
+    const uc = await UC.findById(req.body.UCID)
+
+    try {
+        //* Checking if provided ID for the entomologist exists in our user database
+        // console.log("try block reached")
+        if (!ento) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        //* Checking if provided ID for the UC exists in our UC database
+        else if (!uc) {
+            return res.status(404).json({
+                success: false,
+                message: "UC not found",
+            })
+        }
+        //* Checking if requested user is an entomologist or not
+        else if (ento.desig != "Entomologist") {
+            console.log(`${ento.name} is not entomologist.`)
+            res.status(200).json({
+                success: true,
+                message: `Sorry ${ento.name} is not entomologist `
+            })
+        }
+        else if (ento.desig === "Entomologist") {
+            //* Checking if an ento is already assigned or not
+            //* Assigning the provided ID for the entomolgist as entomologist of the provided UC
+            if (!uc.ento.currentEnto) {
+                console.log("No Entomologist assigned")
+                res.status(200).json({
+                    success: true,
+                    message: `Sorry! No entomologist is already assigned as entomologist to ${uc.survUC}`
+                })
+            }
+            else if (uc.ento.currentEnto) {
+                const alreadyEnto = await User.findById(uc.ento.currentEnto)
+                const oldEnto = alreadyEnto._id
+                uc.ento.currentEnto = null
+                uc.ento.pastEntos.push(oldEnto)
+                await uc.save()
+                console.log(`${alreadyEnto.name} is removed from entomologist of UC: ${uc.survUC} and added to the list of past entomologists.`)
+                res.status(200).json({
+                    success: true,
+                    message: `${alreadyEnto.name} is removed from entomologist of UC: ${uc.survUC} and added to the list of past entomologists.`
+                })
+            }
+        }
+    }
+    catch (err) {
+        return next(new ErrorResponse(`Failed to remove ${ento.name} from entomologist of ${uc.survUC}`, 400))
     }
 }
 

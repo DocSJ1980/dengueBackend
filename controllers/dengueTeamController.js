@@ -209,25 +209,25 @@ export const assignPolioDay = async (req, res, next) => {
     }
 }
 
-//. 4th ROUTE: Assign polioDay to dengueTeam
+//. 5th ROUTE: Release polioDay from dengueTeam
 export const releasePolioDay = async (req, res, next) => {
     try {
         console.log('Request received')
         //* Simple self explanatory route to assign staff to dengue team in UC
         //*Only supervisors are able to assign staff to their UCs
         const polioDay = await PolioDay.findOne({ _id: req.body.polioDayID })
-        console.log(polioDay.dayNo)
+        // console.log(polioDay.dayNo)
         const dengueTeam = await DengueTeam.findById(req.body.dtID)
-        console.log(dengueTeam.teamType)
+        // console.log(dengueTeam.teamType)
         const foundUC = await UC.findOne({ _id: req.fetchedUC._id })
-        console.log(foundUC._id)
+        // console.log(foundUC._id)
         const polioTeam = await PolioTeam.findOne({ $in: { polioDays: polioDay._id } })
-        console.log(polioTeam.teamType)
+        // console.log(polioTeam.teamType)
         const checkAic = await Aic.findOne({ "polioTeams.mobilePolioTeams": polioTeam._id })
-        console.log(checkAic.aicNumber)
+        // console.log(checkAic.aicNumber)
         const checkUC = await UC.findOne({ "polioSubUCs.aic": checkAic._id })
-        console.log(checkUC._id)
-        console.log(checkUC._id.equals(foundUC._id))
+        // console.log(checkUC._id)
+        // console.log(checkUC._id.equals(foundUC._id))
 
         //* Checing if UC of requested polio Day is same as that of assigning supervisor
         //* Checing if correct teamtype is being updated
@@ -236,7 +236,7 @@ export const releasePolioDay = async (req, res, next) => {
             //* Logic for indoor team
             if (dengueTeam.teamType === "Indoor") {
                 if (polioDay.assignedDengueTeam.currentIndoorDT.equals(dengueTeam._id)) {
-                    console.log('Final removal indoor dengueTeam to polioDay reached')
+                    // console.log('Final removal indoor dengueTeam to polioDay reached')
                     const oldIndoorDTs = dengueTeam._id
                     polioDay.assignedDengueTeam.currentIndoorDT = null
                     polioDay.assignedDengueTeam.pastIndoorDTs.push(oldIndoorDTs)
@@ -248,7 +248,7 @@ export const releasePolioDay = async (req, res, next) => {
             //* Logic for outdoor team
             else if (dengueTeam.teamType === "Outdoor") {
                 if (polioDay.assignedDengueTeam.currentOutdoorDT.equals(dengueTeam._id)) {
-                    console.log('Final removal outdoor dengueTeam to polioDay reached')
+                    // console.log('Final removal outdoor dengueTeam to polioDay reached')
                     const oldOutdoorDTs = dengueTeam._id
                     polioDay.assignedDengueTeam.currentOutdoorDT = null
                     polioDay.assignedDengueTeam.pastOutdoorDTs.push(oldOutdoorDTs)
