@@ -1,6 +1,6 @@
 // Imports (express, named imports from userControlller)
 import express from "express"
-import { login, newUser, forgotPassword, resetPassword, verify, logout, getMyProfile, updateProfile, updatePassword, batchUsers, followUser, assignStaff, searchStaff, removeStaff, setSuper, removeSuper, setEnto, removeEnto } from "../controllers/userController.js"
+import { login, newUser, forgotPassword, resetPassword, verify, logout, getMyProfile, updateProfile, updatePassword, batchUsers, followUser, assignStaff, searchStaff, removeStaff, setSuper, removeSuper, setEnto, removeEnto, setTownEnto, removeTownEnto } from "../controllers/userController.js"
 import { isAuthenticated } from "../middleware/auth.js";
 import { isSuper } from "../middleware/superAuth.js";
 import { upload } from "../utils/csvUploader.js"
@@ -26,6 +26,8 @@ router.put("/setsuper", isAuthenticated, setSuper)
 router.put("/removesuper", isAuthenticated, removeSuper)
 router.put("/setento", isAuthenticated, setEnto)
 router.put("/removeento", isAuthenticated, removeEnto)
+router.put("/settownento", isAuthenticated, setTownEnto)
+router.put("/removetownento", isAuthenticated, removeTownEnto)
 router.put("/setstaff", isSuper, assignStaff)
 router.put("/removestaff", isSuper, removeStaff)
 router.get("/staff/:key", isAuthenticated, searchStaff)

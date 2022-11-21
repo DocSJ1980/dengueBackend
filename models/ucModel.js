@@ -47,9 +47,9 @@ const ucSchema = new Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
-    pastTownEnto:
+    pastTownEntos:
       [{
-        oldSuper: {
+        oldTownEnto: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User'
         },
@@ -61,9 +61,9 @@ const ucSchema = new Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
-    pastDdho:
+    pastDdhos:
       [{
-        oldSuper: {
+        oldDdho: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User'
         },

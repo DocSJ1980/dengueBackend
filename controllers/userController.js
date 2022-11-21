@@ -613,6 +613,128 @@ export const removeEnto = async (req, res, next) => {
     }
 }
 
+//. 13TH ROUTE: Set Town Entomoligist Route to assign Town entomologist to Town 
+export const setTownEnto = async (req, res, next) => {
+    const townEnto = await User.findById(req.body.entoID)
+    const ucs = await UC.find({ town: req.body.townID })
+
+    try {
+        //* Checking if provided ID for the entomologist exists in our user database
+        // console.log("try block reached")
+        if (!townEnto) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        //* Checking if provided ID for the UC exists in our UC database
+        else if (!ucs) {
+            return res.status(404).json({
+                success: false,
+                message: "Town not found",
+            })
+        }
+
+        //* Checking if requested user is an entomologist or not
+        if (townEnto.desig === "Entomologist") {
+            let breakCheck = false
+            for (const uc of ucs) {
+                //* Checking if requested user is an entomologist or not
+                console.log(uc.survUC, !uc.townEnto.currentTownEnto)
+
+
+                if (!uc.townEnto.currentTownEnto) {
+                    uc.townEnto.currentTownEnto = townEnto._id
+                    console.log(uc.townEnto.currentTownEnto)
+                    await uc.save()
+                    console.log(`${townEnto.name} successfully assigned as town Entomologist for the UC: ${uc.survUC}`)
+                } else if (uc.townEnto.currentTownEnto) {
+                    res.status(200).json({
+                        success: true,
+                        message: `Sorry! Cannot assign ${townEnto.name} as Town Entomologist for requested town, as ${uc.survUC} already has a town entomologist assigned. Please release the town entomologist`
+                    })
+                    breakCheck = true
+                    break;
+                }
+            }
+            if (!breakCheck) {
+                res.status(200).json({
+                    success: true,
+                    message: `Successfully assigned ${townEnto.name} as Town Entomologist for requested town`
+                })
+            }
+        } else if (townEnto.desig != "Entomologist") {
+            res.status(200).json({
+                success: true,
+                message: `Sorry! ${townEnto.name} is not an entomologist. Please assign an entomologist as Town Entomologist for the requested town`
+            })
+        }
+
+    }
+    catch (err) {
+        return next(new ErrorResponse(`Failed to set ${townEnto.name} as Town entomologist of requested Town`, 400))
+    }
+}
+
+//. 14TH ROUTE: Remove Town Entomologist Route to remove Townn Entomologist from a Town 
+//! TODO Build the function below
+export const removeTownEnto = async (req, res, next) => {
+    const ento = await User.findById(req.body.entoID)
+    const uc = await UC.findById(req.body.UCID)
+
+    try {
+        //* Checking if provided ID for the entomologist exists in our user database
+        // console.log("try block reached")
+        if (!ento) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        //* Checking if provided ID for the UC exists in our UC database
+        else if (!uc) {
+            return res.status(404).json({
+                success: false,
+                message: "UC not found",
+            })
+        }
+        //* Checking if requested user is an entomologist or not
+        else if (ento.desig != "Entomologist") {
+            console.log(`${ento.name} is not entomologist.`)
+            res.status(200).json({
+                success: true,
+                message: `Sorry ${ento.name} is not entomologist `
+            })
+        }
+        else if (ento.desig === "Entomologist") {
+            //* Checking if an ento is already assigned or not
+            //* Assigning the provided ID for the entomolgist as entomologist of the provided UC
+            if (!uc.ento.currentEnto) {
+                console.log("No Entomologist assigned")
+                res.status(200).json({
+                    success: true,
+                    message: `Sorry! No entomologist is already assigned as entomologist to ${uc.survUC}`
+                })
+            }
+            else if (uc.ento.currentEnto) {
+                const alreadyEnto = await User.findById(uc.ento.currentEnto)
+                const oldEnto = alreadyEnto._id
+                uc.ento.currentEnto = null
+                uc.ento.pastEntos.push(oldEnto)
+                await uc.save()
+                console.log(`${alreadyEnto.name} is removed from entomologist of UC: ${uc.survUC} and added to the list of past entomologists.`)
+                res.status(200).json({
+                    success: true,
+                    message: `${alreadyEnto.name} is removed from entomologist of UC: ${uc.survUC} and added to the list of past entomologists.`
+                })
+            }
+        }
+    }
+    catch (err) {
+        return next(new ErrorResponse(`Failed to remove ${ento.name} from entomologist of ${uc.survUC}`, 400))
+    }
+}
+
 
 
 export const followUser = async (req, res, next) => {
