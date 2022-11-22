@@ -11,7 +11,7 @@ import csv from 'fast-csv'
 import DengueTeam from "../models/dengueTeamModel.js"
 
 
-//FIRST ROUTE:  New User Registration controller
+//. FIRST ROUTE:  New User Registration controller
 export const newUser = async (req, res, next) => {
     const { name, cnic, email, password, gender, desig, jobType } = req.body
     try {
@@ -59,7 +59,7 @@ export const newUser = async (req, res, next) => {
     }
 };
 
-//SECOND ROUTE: Email Verification controller
+//. SECOND ROUTE: Email Verification controller
 export const verify = async (req, res, next) => {
     try {
         const { otp } = req.body
@@ -83,7 +83,7 @@ export const verify = async (req, res, next) => {
     }
 };
 
-//THIRD ROUTE: Login controller
+//. THIRD ROUTE: Login controller
 export const login = async (req, res, next) => {
     const { email, password } = req.body;
 
@@ -110,7 +110,7 @@ export const login = async (req, res, next) => {
     }
 };
 
-//FOURTH ROUTE: Forgot Password controller
+//. FOURTH ROUTE: Forgot Password controller
 export const forgotPassword = async (req, res, next) => {
     const { email } = req.body;
 
@@ -147,7 +147,7 @@ export const forgotPassword = async (req, res, next) => {
     }
 }
 
-//FIFTH ROUTE: Reset Password Controller
+//. FIFTH ROUTE: Reset Password Controller
 export const resetPassword = async (req, res, next) => {
     try {
         const { resetOtp, newPassword } = req.body;
@@ -175,7 +175,7 @@ export const resetPassword = async (req, res, next) => {
     }
 };
 
-//SIXTH ROUTE: Logout Controller
+//. SIXTH ROUTE: Logout Controller
 export const logout = async (req, res, next) => {
     try {
         res
@@ -188,7 +188,7 @@ export const logout = async (req, res, next) => {
     }
 };
 
-//SEVENTH ROUTE: Get profile controller
+//. SEVENTH ROUTE: Get profile controller
 export const getMyProfile = async (req, res, next) => {
     try {
         const foundUser = await User.findById(req.user._id);
@@ -199,7 +199,7 @@ export const getMyProfile = async (req, res, next) => {
     }
 };
 
-//EIGHTH ROUTE: Update Profile Controller
+//. EIGHTH ROUTE: Update Profile Controller
 export const updateProfile = async (req, res, next) => {
     try {
         const foundUser = await User.findById(req.user._id);
@@ -232,7 +232,7 @@ export const updateProfile = async (req, res, next) => {
     }
 };
 
-//NINTH ROUTE: Update Password Controller
+//. NINTH ROUTE: Update Password Controller
 export const updatePassword = async (req, res, next) => {
     try {
         const foundUser = await User.findById(req.user._id).select("+password");
@@ -264,7 +264,7 @@ export const updatePassword = async (req, res, next) => {
     }
 };
 
-//TENTH ROUTE: Batch create Users with CSV file
+//. TENTH ROUTE: Batch create Users with CSV file
 export const batchUsers = async (req, res, next) => {
     const allRecords = []
     try {
@@ -390,7 +390,7 @@ export const removeSuper = async (req, res, next) => {
     }
 }
 
-//.12TH ROUTE: Search staff based on multiple fields
+//. 13TH ROUTE: Search staff based on multiple fields
 export const searchStaff = async (req, res, next) => {
     try {
         // Simple route self explanatory
@@ -412,7 +412,7 @@ export const searchStaff = async (req, res, next) => {
     }
 }
 
-//13TH ROUTE: Assign staff to UC
+//. 14TH ROUTE: Assign staff to UC
 export const assignStaff = async (req, res, next) => {
     try {
         //Simple self explanatory route to assign staff to UC
@@ -455,7 +455,7 @@ export const assignStaff = async (req, res, next) => {
     }
 }
 
-//14TH ROUTE: Remove staff from UC
+//. 15TH ROUTE: Remove staff from UC
 export const removeStaff = async (req, res, next) => {
     try {
         //Simple self explanatory route to remove staff from UC
@@ -498,7 +498,7 @@ export const removeStaff = async (req, res, next) => {
     }
 }
 
-//. 11TH ROUTE: Set Entomoligist Route to assign an entomologist to UC 
+//. 16TH ROUTE: Set Entomoligist Route to assign an entomologist to UC 
 export const setEnto = async (req, res, next) => {
     const ento = await User.findById(req.body.entoID)
     const uc = await UC.findById(req.body.UCID)
@@ -554,8 +554,7 @@ export const setEnto = async (req, res, next) => {
     }
 }
 
-//. 12TH ROUTE: Remove Entomologist Route to remove Entomologist from UC 
-//! TODO Build the function below
+//. 17TH ROUTE: Remove Entomologist Route to remove Entomologist from UC 
 export const removeEnto = async (req, res, next) => {
     const ento = await User.findById(req.body.entoID)
     const uc = await UC.findById(req.body.UCID)
@@ -613,7 +612,7 @@ export const removeEnto = async (req, res, next) => {
     }
 }
 
-//. 13TH ROUTE: Set Town Entomoligist Route to assign Town entomologist to Town 
+//. 18TH ROUTE: Set Town Entomoligist Route to assign Town entomologist to Town 
 export const setTownEnto = async (req, res, next) => {
     const townEnto = await User.findById(req.body.entoID)
     const ucs = await UC.find({ town: req.body.townID })
@@ -640,9 +639,6 @@ export const setTownEnto = async (req, res, next) => {
             let breakCheck = false
             for (const uc of ucs) {
                 //* Checking if requested user is an entomologist or not
-                console.log(uc.survUC, !uc.townEnto.currentTownEnto)
-
-
                 if (!uc.townEnto.currentTownEnto) {
                     uc.townEnto.currentTownEnto = townEnto._id
                     console.log(uc.townEnto.currentTownEnto)
@@ -676,64 +672,178 @@ export const setTownEnto = async (req, res, next) => {
     }
 }
 
-//. 14TH ROUTE: Remove Town Entomologist Route to remove Townn Entomologist from a Town 
-//! TODO Build the function below
+//. 19TH ROUTE: Remove Town Entomologist Route to remove Townn Entomologist from a Town 
 export const removeTownEnto = async (req, res, next) => {
-    const ento = await User.findById(req.body.entoID)
-    const uc = await UC.findById(req.body.UCID)
+    const townEnto = await User.findById(req.body.entoID)
+    const ucs = await UC.find({ "townEnto.currentTownEnto": req.body.entoID })
 
     try {
         //* Checking if provided ID for the entomologist exists in our user database
         // console.log("try block reached")
-        if (!ento) {
+        if (!townEnto) {
             return res.status(404).json({
                 success: false,
                 message: "User not found",
             })
         }
-        //* Checking if provided ID for the UC exists in our UC database
-        else if (!uc) {
+        //* Checking if provided ID for the entomolgist is assigned as town entomologist
+        else if (ucs.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "UC not found",
+                message: "Requested User is not town entomologist in any town",
             })
         }
+
         //* Checking if requested user is an entomologist or not
-        else if (ento.desig != "Entomologist") {
-            console.log(`${ento.name} is not entomologist.`)
+        if (townEnto.desig === "Entomologist" && ucs.length > 0) {
+            for (const uc of ucs) {
+                //* Checking if requested user is an entomologist or not
+                console.log(uc.survUC, !uc.townEnto.currentTownEnto)
+
+                if (uc.townEnto.currentTownEnto) {
+                    uc.townEnto.currentTownEnto = null
+                    const oldTownEnto = townEnto._id
+                    uc.townEnto.pastTownEntos.push(oldTownEnto)
+                    await uc.save()
+                    console.log(`${townEnto.name} successfully removed from town Entomologist for the UC: ${uc.survUC}`)
+                }
+            }
+            //* Returning response after successful loop
             res.status(200).json({
                 success: true,
-                message: `Sorry ${ento.name} is not entomologist `
+                message: `Successfully removed ${townEnto.name} from Town Entomologist for requested town and added to the list of past town entomologists`
             })
         }
-        else if (ento.desig === "Entomologist") {
-            //* Checking if an ento is already assigned or not
-            //* Assigning the provided ID for the entomolgist as entomologist of the provided UC
-            if (!uc.ento.currentEnto) {
-                console.log("No Entomologist assigned")
-                res.status(200).json({
-                    success: true,
-                    message: `Sorry! No entomologist is already assigned as entomologist to ${uc.survUC}`
-                })
-            }
-            else if (uc.ento.currentEnto) {
-                const alreadyEnto = await User.findById(uc.ento.currentEnto)
-                const oldEnto = alreadyEnto._id
-                uc.ento.currentEnto = null
-                uc.ento.pastEntos.push(oldEnto)
-                await uc.save()
-                console.log(`${alreadyEnto.name} is removed from entomologist of UC: ${uc.survUC} and added to the list of past entomologists.`)
-                res.status(200).json({
-                    success: true,
-                    message: `${alreadyEnto.name} is removed from entomologist of UC: ${uc.survUC} and added to the list of past entomologists.`
-                })
-            }
+        //* In case the provided ID is not of an entomologist
+        else if (townEnto.desig != "Entomologist") {
+            res.status(200).json({
+                success: true,
+                message: `Sorry! ${townEnto.name} is not an entomologist. Please assign an entomologist as Town Entomologist for the requested town`
+            })
         }
+
     }
     catch (err) {
-        return next(new ErrorResponse(`Failed to remove ${ento.name} from entomologist of ${uc.survUC}`, 400))
+        return next(new ErrorResponse(`Operation Failed: Town Entomologist release`, 400))
     }
 }
+
+//. 20TH ROUTE: Set DDHO Route to assign DDHO to Town 
+export const setDdho = async (req, res, next) => {
+    const ddho = await User.findById(req.body.ddhoID)
+    const ucs = await UC.find({ town: req.body.townID })
+
+    try {
+        //* Checking if provided ID for the DDHO exists in our user database
+        // console.log("try block reached")
+        if (!ddho) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        //* Checking if provided ID for the town exists in our town database
+        else if (!ucs) {
+            return res.status(404).json({
+                success: false,
+                message: "Town not found",
+            })
+        }
+
+        //* Checking if requested user is DDHO or not
+        if (ddho.desig === "DDHO") {
+            let breakCheck = false
+            for (const uc of ucs) {
+                //* Checking if requested DDHO is assigned to the UCs of the town or not and if not then assigning provided DDHO to the UCs
+                if (!uc.ddho.currentDdho) {
+                    uc.ddho.currentDdho = ddho._id
+                    console.log(uc.ddho.currentDdho)
+                    await uc.save()
+                    console.log(`${ddho.name} successfully assigned as DDHO for the UC: ${uc.survUC}`)
+                } else if (uc.ddho.currentDdho) {
+                    res.status(200).json({
+                        success: true,
+                        message: `Sorry! Cannot assign ${ddho.name} as DDHO for requested town, as ${uc.survUC} already has a DDDHO assigned. Please release the DDHO`
+                    })
+                    breakCheck = true
+                    break;
+                }
+            }
+            if (!breakCheck) {
+                res.status(200).json({
+                    success: true,
+                    message: `Successfully assigned ${ddho.name} as DDHO for requested town`
+                })
+            }
+        } else if (ddho.desig != "DDHO") {
+            res.status(200).json({
+                success: true,
+                message: `Sorry! ${ddho.name} is not DDHO. Please assign a DDHO as DDHO for the requested town`
+            })
+        }
+
+    }
+    catch (err) {
+        return next(new ErrorResponse(`Failed to set ${ddho.name} as DDHO of requested Town`, 400))
+    }
+}
+
+//. 21st ROUTE: Remove DDHO Route to remove DDHO from a Town 
+export const removeDdho = async (req, res, next) => {
+    const ddho = await User.findById(req.body.ddhoID)
+    const ucs = await UC.find({ "ddho.currentDdho": req.body.ddhoID })
+
+    try {
+        //* Checking if provided ID for the DDHO exists in our user database
+        // console.log("try block reached")
+        if (!ddho) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        //* Checking if provided ID for the DDHO is assigned as DDHO
+        else if (ucs.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Requested User is not DDHO in any town",
+            })
+        }
+
+        //* Checking if requested user is an DDHO or not
+        if (ddho.desig === "DDHO" && ucs.length > 0) {
+            for (const uc of ucs) {
+                //* Checking if requested user is an DDHO or not
+                console.log(uc.survUC, !uc.ddho.currentDdho)
+
+                if (uc.ddho.currentDdho) {
+                    uc.ddho.currentDdho = null
+                    const oldDdho = ddho._id
+                    uc.ddho.pastDdhos.push(oldDdho)
+                    await uc.save()
+                    console.log(`${ddho.name} successfully removed from DDHO for the UC: ${uc.survUC}`)
+                }
+            }
+            //* Returning response after successful loop
+            res.status(200).json({
+                success: true,
+                message: `Successfully removed ${ddho.name} from DDHO for requested town and added to the list of past town entomologists`
+            })
+        }
+        //* In case the provided ID is not of an entomologist
+        else if (ddho.desig != "Entomologist") {
+            res.status(200).json({
+                success: true,
+                message: `Sorry! ${ddho.name} is not an entomologist. Please assign an entomologist as Town Entomologist for the requested town`
+            })
+        }
+
+    }
+    catch (err) {
+        return next(new ErrorResponse(`Operation Failed: Town Entomologist release`, 400))
+    }
+}
+
 
 
 

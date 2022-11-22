@@ -38,7 +38,7 @@ const userSchema = new Schema({
     status: { type: String },
     desig: {
         type: String,
-        enum: ['Sanitary Patrol', 'Entomologist', 'Public Health Worker']
+        enum: ['Sanitary Patrol', 'Entomologist', 'Public Health Worker', 'DDHO']
     },
     jobType: {
         type: String,
