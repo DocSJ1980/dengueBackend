@@ -6,6 +6,7 @@ import simplesRouter from "./routes/simplesRoutes.js"
 import ucRouter from "./routes/ucRoutes.js"
 import townRouter from "./routes/townRoutes.js"
 import teamRouter from "./routes/teamRoutes.js"
+import polioDayRouter from "./routes/polioDayRoutes.js"
 import errorHandler from "./middleware/errorHandler.js";
 import { connectDB } from "./config/database.js"
 import passport from "passport"
@@ -31,6 +32,7 @@ app.use("/simples", simplesRouter)
 app.use("/uc", ucRouter)
 app.use("/town", townRouter)
 app.use("/teams", teamRouter)
+app.use("/polioday", polioDayRouter)
 
 // Connecting Database
 connectDB(URI)

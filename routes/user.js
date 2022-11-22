@@ -1,6 +1,7 @@
 // Imports (express, named imports from userControlller)
 import express from "express"
-import { login, newUser, forgotPassword, resetPassword, verify, logout, getMyProfile, updateProfile, updatePassword, batchUsers, followUser, assignStaff, searchStaff, removeStaff, setSuper, removeSuper, setEnto, removeEnto, setTownEnto, removeTownEnto, setDdho, removeDdho } from "../controllers/userController.js"
+import { login, newUser, forgotPassword, resetPassword, verify, logout, getMyProfile, updateProfile, updatePassword, batchUsers, followUser, searchStaff } from "../controllers/userController.js"
+import { assignStaff, removeStaff, setSuper, removeSuper, setEnto, removeEnto, setTownEnto, removeTownEnto, setDdho, removeDdho, assignAic, removeAic } from "../controllers/assignReleaseController.js"
 import { isAuthenticated } from "../middleware/auth.js";
 import { isSuper } from "../middleware/superAuth.js";
 import { isTownEnto } from "../middleware/townEntoAuth.js";
@@ -28,6 +29,8 @@ router.get("/staff/:key", isAuthenticated, searchStaff)
 // Set-Release routes
 router.put("/setstaff", isSuper, assignStaff)
 router.put("/removestaff", isSuper, removeStaff)
+router.put("/setaic", isSuper, assignAic)
+router.put("/removestaff", isSuper, removeAic)
 router.put("/setsuper", isAuthenticated, setSuper)
 router.put("/removesuper", isAuthenticated, removeSuper)
 router.put("/setento", isTownEnto, setEnto)

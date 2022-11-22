@@ -1,6 +1,20 @@
 import mongoose, { Schema, model } from "mongoose";
 
 const aicSchema = new Schema({
+    areaIncharge: {
+        currentAic: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        pastAics: [{
+            oldAic: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            },
+            changeDate: { type: Date, default: Date.now }
+        }]
+
+    },
     aicNumber: { type: String, required: true },
     polioTeams: {
         mobilePolioTeams: [{
@@ -79,19 +93,33 @@ const polioDay = new Schema({
 
     },
     street: [{
-        address: { type: String, required: true },
-        house: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'House'
-        }],
-        spot: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Spot'
-        }]
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Street'
     }]
 },
     { timestamps: true })
 
 
 export const PolioDay = mongoose.model("polioDay", polioDay);
+
+const street = new Schema({
+
+    address: { type: String, required: true },
+    startingImg: { type: String },
+    endingImg: { type: String },
+    wayPointImgs: [{ type: String }],
+    house: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'House'
+    }],
+    spot: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Spot'
+    }]
+
+},
+    { timestamps: true })
+
+
+export const Street = mongoose.model("street", street);
 
