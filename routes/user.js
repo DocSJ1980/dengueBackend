@@ -3,6 +3,7 @@ import express from "express"
 import { login, newUser, forgotPassword, resetPassword, verify, logout, getMyProfile, updateProfile, updatePassword, batchUsers, followUser, assignStaff, searchStaff, removeStaff, setSuper, removeSuper, setEnto, removeEnto, setTownEnto, removeTownEnto, setDdho, removeDdho } from "../controllers/userController.js"
 import { isAuthenticated } from "../middleware/auth.js";
 import { isSuper } from "../middleware/superAuth.js";
+import { isTownEnto } from "../middleware/townEntoAuth.js";
 import { upload } from "../utils/csvUploader.js"
 
 // Consts (initializing router)
@@ -29,12 +30,12 @@ router.put("/setstaff", isSuper, assignStaff)
 router.put("/removestaff", isSuper, removeStaff)
 router.put("/setsuper", isAuthenticated, setSuper)
 router.put("/removesuper", isAuthenticated, removeSuper)
-router.put("/setento", isAuthenticated, setEnto)
-router.put("/removeento", isAuthenticated, removeEnto)
-router.put("/settownento", isAuthenticated, setTownEnto)
-router.put("/removetownento", isAuthenticated, removeTownEnto)
-router.put("/setddho", isAuthenticated, setDdho)
-router.put("/removeddho", isAuthenticated, removeDdho)
+router.put("/setento", isTownEnto, setEnto)
+router.put("/removeento", isTownEnto, removeEnto)
+router.put("/settownento", isTownEnto, setTownEnto)
+router.put("/removetownento", isTownEnto, removeTownEnto)
+router.put("/setddho", isTownEnto, setDdho)
+router.put("/removeddho", isTownEnto, removeDdho)
 
 
 
