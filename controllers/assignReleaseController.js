@@ -539,7 +539,7 @@ export const assignAic = async (req, res, next) => {
         else if (!aic) {
             return res.status(404).json({
                 success: false,
-                message: "PolioDay not found",
+                message: "Polio area not found",
             })
         }
 
@@ -581,56 +581,73 @@ export const assignAic = async (req, res, next) => {
 
 //. 12th ROUTE: Remove Aic Route to remove Area incharge from a PolioDay 
 export const removeAic = async (req, res, next) => {
-    const ddho = await User.findById(req.body.ddhoID)
-    const ucs = await UC.find({ "ddho.currentDdho": req.body.ddhoID })
-
+    const areaIncharge = await User.findById(req.body.areaInchareID)
+    const area = await Aic.findById(req.body.aicID)
+    const checkAreaUC = await UC.findOne({ "polioSubUCs.aic": area._id })
+    console.log(areaIncharge.name, area.aicNumber, req.fetchedUC.survUC, checkAreaUC.survUC)
     try {
-        //* Checking if provided ID for the DDHO exists in our user database
+        //* Checking if provided ID for the Area Incharge exists in our database
         // console.log("try block reached")
-        if (!ddho) {
+        if (!areaIncharge) {
             return res.status(404).json({
                 success: false,
                 message: "User not found",
             })
         }
-        //* Checking if provided ID for the DDHO is assigned as DDHO
-        else if (ucs.length === 0) {
+        //* Checking if provided ID for the area exists in our database
+        else if (!area) {
             return res.status(404).json({
                 success: false,
-                message: "Requested User is not DDHO in any town",
+                message: "Polio area not found",
             })
         }
 
-        //* Checking if requested user is an DDHO or not
-        if (ddho.desig === "DDHO" && ucs.length > 0) {
-            for (const uc of ucs) {
-                //* Checking if requested user is an DDHO or not
-                console.log(uc.survUC, !uc.ddho.currentDdho)
-
-                if (uc.ddho.currentDdho) {
-                    uc.ddho.currentDdho = null
-                    const oldDdho = ddho._id
-                    uc.ddho.pastDdhos.push(oldDdho)
-                    await uc.save()
-                    console.log(`${ddho.name} successfully removed from DDHO for the UC: ${uc.survUC}`)
+        //* Checking if supervisor's UC and requested area UC match
+        if (checkAreaUC.survUC === req.fetchedUC.survUC) {
+            console.log("1st if reached")
+            console.log(area)
+            //* Checking if an area Incharge is already assigned
+            if (area.areaIncharge.currentAic) {
+                console.log("2nd if reached")
+                const checkAreaIncharge = await User.findById(area.areaIncharge.currentAic)
+                if (checkAreaIncharge._id.equals(areaIncharge._id)) {
+                    console.log("3rd if reached")
+                    area.areaIncharge.currentAic = null
+                    const oldAic = areaIncharge._id
+                    area.areaIncharge.pastAics.push(oldAic)
+                    await area.save()
+                    res.status(200).json({
+                        success: true,
+                        message: `${areaIncharge.name} successfully removed from current area incharge for requested area`
+                    })
+                } else if (!checkAreaIncharge._id.equals(areaIncharge._id)) {
+                    console.log("3rd else reached")
+                    res.status(200).json({
+                        success: true,
+                        message: `Request area Incharge and assigned area incharge do not match`
+                    })
                 }
+            } else if (!area.areaIncharge.currentAic) {
+                console.log("2nd else reached")
+                res.status(200).json({
+                    success: true,
+                    message: `No area incharge currently assigned for requested area`
+                })
+
             }
-            //* Returning response after successful loop
-            res.status(200).json({
-                success: true,
-                message: `Successfully removed ${ddho.name} from DDHO for requested town and added to the list of past town entomologists`
-            })
+
         }
-        //* In case the provided ID is not of an entomologist
-        else if (ddho.desig != "Entomologist") {
+        //* Returning response if supervisor's UC and requested area UC doe's not match
+        else if (!checkAreaUC._id.equals(req.fetchedUC._id).equals(reqAicUC._id)) {
+            console.log("1st else reached")
             res.status(200).json({
                 success: true,
-                message: `Sorry! ${ddho.name} is not an entomologist. Please assign an entomologist as Town Entomologist for the requested town`
+                message: `UC Mismatch. Please contact District Dengue Cell.`
             })
         }
 
     }
     catch (err) {
-        return next(new ErrorResponse(`Operation Failed: Town Entomologist release`, 400))
+        return next(new ErrorResponse(`Failed to remove ${areaIncharge.name} from area incharge of requested area`, 400))
     }
 }
