@@ -65,8 +65,47 @@ const polioDay = new Schema({
     dayNo: { type: "Number", required: true },
     area: { type: String, minimumLength: 100 },
     startingImg: { type: String },
+    startingPoint: {
+        location: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                default: "Point"
+            },
+            coordinates: {
+                type: [Number],
+                index: '2dsphere'
+            }
+        }
+    },
     endingImg: { type: String },
+    endingPoint: {
+        location: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                default: "Point"
+            },
+            coordinates: {
+                type: [Number],
+                index: '2dsphere'
+            }
+        }
+    },
     wayPointImgs: [{ type: String }],
+    wayPoints: [{
+        location: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                default: "Point"
+            },
+            coordinates: {
+                type: [Number],
+                index: '2dsphere'
+            }
+        }
+    }],
     assignedDengueTeam: {
         currentIndoorDT: {
             type: mongoose.Schema.Types.ObjectId,
@@ -107,7 +146,7 @@ const street = new Schema({
     address: { type: String, required: true },
     startingImg: { type: String },
     endingImg: { type: String },
-    wayPointImgs: [{ type: String }],
+    wayPointImgs: [{ wayPointImg: { type: String } }],
     house: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'House'

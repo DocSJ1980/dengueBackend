@@ -11,7 +11,6 @@ import errorHandler from "./middleware/errorHandler.js";
 import { connectDB } from "./config/database.js"
 import passport from "passport"
 import cookieParser from "cookie-parser"
-
 // Declaring Path for dotenv
 config({
     path: "./config/config.env"
@@ -23,7 +22,7 @@ const port = process.env.PORT
 const URI = process.env.URI
 
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 // Using routes
