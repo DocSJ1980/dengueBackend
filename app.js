@@ -32,6 +32,7 @@ app.use("/uc", ucRouter)
 app.use("/town", townRouter)
 app.use("/teams", teamRouter)
 app.use("/polioday", polioDayRouter)
+app.use(express.static('images'))
 
 // Connecting Database
 connectDB(URI)
