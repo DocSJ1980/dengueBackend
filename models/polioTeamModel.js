@@ -64,9 +64,9 @@ export const PolioTeam = mongoose.model("polioTeam", polioTeamSchema);
 const polioDay = new Schema({
     dayNo: { type: "Number", required: true },
     area: { type: String, minimumLength: 100 },
-    startingImg: { type: String },
     startingPoint: {
-        location: {
+        startingImg: { type: String },
+        startingLocation: {
             type: {
                 type: String,
                 enum: ['Point'],
@@ -78,9 +78,10 @@ const polioDay = new Schema({
             }
         }
     },
-    endingImg: { type: String },
+
     endingPoint: {
-        location: {
+        endingImg: { type: String },
+        endingLocation: {
             type: {
                 type: String,
                 enum: ['Point'],
@@ -90,11 +91,12 @@ const polioDay = new Schema({
                 type: [Number],
                 index: '2dsphere'
             }
-        }
+        },
     },
-    wayPointImgs: [{ type: String }],
+
     wayPoints: [{
-        location: {
+        wayPointImg: { type: String },
+        wayPointLocation: {
             type: {
                 type: String,
                 enum: ['Point'],

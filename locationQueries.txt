@@ -1,0 +1,29 @@
+{
+  "wayPoints.wayPointLocation":
+  { $near:
+    {
+      $geometry: { type: "Point",  coordinates: [ 73.0091388, 33.5954126 ] },
+      $maxDistance: 10000
+    }
+  }
+}
+================================================================
+{
+  "startingPoint.startingLocation":
+  { $near:
+    {
+      $geometry: { type: "Point",  coordinates: [ 73.0091388, 33.5954126 ] },
+      $maxDistance: 10000
+    }
+  }
+}
+================================================================
+{
+  "endingPoint.endingLocation":
+  { $near:
+    {
+      $geometry: { type: "Point",  coordinates: [ 73.0091388, 33.5954126 ] },
+      $maxDistance: 10000
+    }
+  }
+}
