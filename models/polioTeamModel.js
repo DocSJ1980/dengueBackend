@@ -78,7 +78,6 @@ const polioDay = new Schema({
             }
         }
     },
-
     endingPoint: {
         endingImg: { type: String },
         endingLocation: {
@@ -93,7 +92,6 @@ const polioDay = new Schema({
             }
         },
     },
-
     wayPoints: [{
         wayPointImg: { type: String },
         wayPointLocation: {
@@ -145,7 +143,7 @@ export const PolioDay = mongoose.model("polioDay", polioDay);
 
 const street = new Schema({
 
-    address: { type: String, required: true },
+    address: { type: String },
     startingImg: { type: String },
     endingImg: { type: String },
     wayPointImgs: [{ wayPointImg: { type: String } }],
