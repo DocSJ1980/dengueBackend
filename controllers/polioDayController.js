@@ -1,16 +1,18 @@
 // Importing express server, router, middleware i.e. fetchuser, models i.e. Notes and express validator
-import { PolioDay, Street } from "../models/polioTeamModel.js"
+import { PolioDay } from "../models/polioTeamModel.js"
 import ErrorResponse from "../utils/Error.js"
 import path from 'path'
 import fs from 'fs'
 import { URL } from "url"
 import { getData } from "../utils/getDataFromID.js";
 import { filePath } from "../utils/filePath.js";
+import { House, HouseHold } from "../models/sitesModel.js"
 
 //. FIRST ROUTE: Add details to Dengue Day
 export const fillPolioDay = async (req, res, next) => {
     try {
-        const { foundUC, foundAic, foundPolioTeam, foundPolioDay, foundStreet } = await getData(req.body.polioDayID)
+        console.log(req.body)
+        const { foundUC, foundAic, foundPolioTeam, foundPolioDay } = await getData(req.body.polioDayID)
 
         const images = req.files
         const wpImgs = images.wayPointImgs
@@ -31,7 +33,7 @@ export const fillPolioDay = async (req, res, next) => {
                 let imgType = "startImg"
                 let ext = path.extname(images.start[0].originalname)
                 let imgName = Date.now() + ext
-                const startImgPath = await filePath(foundUC, foundAic, foundPolioTeam, foundPolioDay, foundStreet, imgType) + imgName
+                const startImgPath = await filePath(foundUC, foundAic, foundPolioTeam, foundPolioDay, imgType) + imgName
                 console.log(foundPolioDay.startingPoint.startingImg)
                 //* Deleting images from storage through locations in database
                 if (foundPolioDay.startingPoint.startingImg) {
@@ -58,7 +60,7 @@ export const fillPolioDay = async (req, res, next) => {
                 const endingLocation = { type: "Point", coordinates: [req.body.endLong, req.body.endLat] }
                 let ext = path.extname(images.end[0].originalname)
                 let imgName = Date.now() + ext
-                const endImgPath = await filePath(foundUC, foundAic, foundPolioTeam, foundPolioDay, foundStreet, imgType) + imgName
+                const endImgPath = await filePath(foundUC, foundAic, foundPolioTeam, foundPolioDay, imgType) + imgName
                 console.log(endImgPath)
                 //* Deleting images from storage through locations in database
                 if (foundPolioDay.endingPoint.endingImg) {
@@ -109,7 +111,7 @@ export const fillPolioDay = async (req, res, next) => {
                     let ext = path.extname(img.originalname)
                     let imgName = Date.now() + ext
                     // const wayPointLocation = { coordinates: [wayPointLong[j], wayPointLat[j]] }
-                    const wpImg = await filePath(foundUC, foundAic, foundPolioTeam, foundPolioDay, foundStreet, imgType) + imgName
+                    const wpImg = await filePath(foundUC, foundAic, foundPolioTeam, foundPolioDay, imgType) + imgName
                     // conspe.log(wpImg, wayPointLocation)
                     // console.log(wayPoints)
                     await fs.promises.writeFile(wpImg, img.buffer)
@@ -130,22 +132,61 @@ export const fillPolioDay = async (req, res, next) => {
     }
 };
 
-//. 2nd Route: Create New Street
-export const createNewStreet = async (req, res, next) => {
-    const { foundAic, foundPolioDay } = await getData(req.body.polioDayID)
-
+//. 2nd Route: Create New House
+export const createNewHouse = async (req, res, next) => {
+    const { foundUC, foundAic, foundPolioTeam, foundPolioDay } = await getData(req.body.polioDayID)
     try {
-        if (req.aic._id.equals(foundAic._id)) {
-            if (foundPolioDay.street.length < 5) {
-                const street = await Street.create({})
-                foundPolioDay.street.push(street._id)
-                await foundPolioDay.save({})
-                res.status(200).json("Create new Street: Operation successful")
-            } else {
-                return next(new ErrorResponse("Update Polio Day: Requested Operation Failed (Creating more than 5 streets in a polio day are not allowed. Please contact District Dengue Cell!).", 403))
+        //* Authenticating if the reporting team is assigned to the polio day or not
+        //* Authenticity of the team already checked in isTeam middleware in routes
+        if (req.polioDay._id.equals(foundPolioDay._id)) {
+            //* Getting information from the body
+            const dhNo = req.body.dhNo
+            const polioHouseNo = req.body.polioHouseNo
+            const residentName = req.body.residentName
+            const residentContact = req.body.residentContact
+            const storeys = req.body.storeys
+            const houseHolds = req.body.houseHolds
+            const long = req.body.long
+            const lat = req.body.lat
+            const location = { type: "Point", coordinates: [long, lat] }
+            //* Logic for getting image, saving file in folder and path in database
+            //! Uncomment while implementing api call from frontend
+            // let houseFrontImg = req.file
+            // const ext = path.extname(houseFrontImg.originalname)
+            // const imgName = Date.now() + ext
+            // const imgType = "Houses"
+            // const houseImgPath = await filePath(foundUC, foundAic, foundPolioTeam, foundPolioDay, imgType) + imgName
+            // await fs.promises.writeFile(houseImgPath, houseFrontImg.buffer)
+            // houseFrontImg = houseImgPath
+            // console.log("Working: " + dhNo, polioHouseNo, residentName, residentContact, storeys, houseHolds, houseFrontImg, ext, imgName, imgType, houseImgPath, location)
+
+            //* Creating house with information from body and image path
+            //! add houseFrontImg when uncommenting above block
+            const house = await House.create({ dhNo, polioHouseNo, residentName, residentContact, storeys, location })
+
+            //* Creating Households based on the data provided and referencing to the house created above
+            console.log("HouseHolds", houseHolds.length)
+            if (houseHolds.length > 0) {
+                for (const houseHold of houseHolds) {
+                    const hHold = await HouseHold.create({})
+                    if (houseHold.persons.length > 0) {
+                        for (const person of houseHold.persons) {
+                            console.log(person)
+                            hHold.persons.push(person)
+                            await hHold.save()
+                        }
+                    }
+                    house.houseHolds.push(hHold._id)
+                    await house.save()
+                }
             }
+            await house.save()
+            foundPolioDay.houses.push(house._id)
+            await foundPolioDay.save({})
+            res.status(200).json("Create new House: Operation successful")
+
         } else {
-            return next(new ErrorResponse("Update Polio Day: Requested Operation Failed (You are not area incharege of requested polio day).", 401))
+            return next(new ErrorResponse("Create New House: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
         }
     } catch (error) {
         return next(new ErrorResponse("Create new Street: Requested Operation Failed", 409))

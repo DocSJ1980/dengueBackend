@@ -1,0 +1,31 @@
+{
+    "polioDayID": "636e5430ec121c364f09ac4b",
+    "long": "73.0091381",
+    "lat": "33.5954121",
+    "dhNo": "22",
+    "polioHouseNo": "1",
+    "residentName": "Test Resident",
+    "residentContact": "03005111111",
+    "storeys": "2",
+    "houseHolds": [{"child": 
+        [{ 
+            "gender": "Male",
+            "dob": "2013-10-21T13:28:06.419Z"
+        }],
+        "adult": [{ 
+            "gender": "Male", 
+            "dob": "2013-10-21T13:28:06.419Z"
+            },
+            {  "gender": "Female",
+                "dob": "2013-10-21T13:28:06.419Z" 
+            }]},
+        {"child": [{ 
+            "gender": "Female", 
+            "dob": "2013-10-21T13:28:06.419Z"
+        }],
+        "adult": [{ 
+            "gender": "Male", 
+            "dob": "2013-10-21T13:28:06.419Z"}, 
+            { "gender": "Female", 
+            "dob": "2013-10-21T13:28:06.419Z" }]}]
+}

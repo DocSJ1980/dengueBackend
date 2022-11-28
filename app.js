@@ -1,4 +1,4 @@
-// Imports
+//. Imports
 import express from "express";
 import { config } from "dotenv";
 import userRouter from "./routes/user.js"
@@ -12,23 +12,26 @@ import { connectDB } from "./config/database.js"
 import passport from "passport"
 import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
-// Declaring Path for dotenv
+// import multer from 'multer'
+
+//. Declaring Path for dotenv
 config({
     path: "./config/config.env"
 })
 
-// Declaring consts and initializing express
+//. Declaring consts and initializing express
 const app = express()
 const port = process.env.PORT
 const URI = process.env.URI
+// const upload = multer()
 
+//. Middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
+// app.use(upload.array())
 app.use(cookieParser())
 
-// Using routes
+//. Using routes
 app.use("/user", userRouter)
 app.use("/simples", simplesRouter)
 app.use("/uc", ucRouter)
@@ -37,17 +40,17 @@ app.use("/teams", teamRouter)
 app.use("/polioday", polioDayRouter)
 app.use(express.static('images'))
 
-// Connecting Database
+//. Connecting Database
 connectDB(URI)
 
-// Running the server
+//. Running the server
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`)
 })
 
 
-// Initialize passport
+//. Initialize passport
 app.use(passport.initialize());
 
-// Using custom error handler
+//. Using custom error handler
 app.use(errorHandler)

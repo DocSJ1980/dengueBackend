@@ -131,34 +131,16 @@ const polioDay = new Schema({
         }]
 
     },
-    street: [{
+    houses: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Street'
+        ref: 'House'
+    }],
+    spots: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'House'
     }]
 },
     { timestamps: true })
 
 
 export const PolioDay = mongoose.model("polioDay", polioDay);
-
-const street = new Schema({
-
-    address: { type: String },
-    startingImg: { type: String },
-    endingImg: { type: String },
-    wayPointImgs: [{ wayPointImg: { type: String } }],
-    house: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'House'
-    }],
-    spot: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Spot'
-    }]
-
-},
-    { timestamps: true })
-
-
-export const Street = mongoose.model("street", street);
-
