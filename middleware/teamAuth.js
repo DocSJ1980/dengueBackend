@@ -25,11 +25,11 @@ export const isTeam = async (req, res, next) => {
         req.dengueTeam = await DengueTeam.findOne({ currentMembers: req.user._id })
         console.log(req.dengueTeam.teamType)
         if (req.dengueTeam.teamType === 'Indoor') {
-            req.polioDay = await PolioDay.findOne({
+            req.polioDay = await PolioDay.find({
                 "assignedDengueTeam.currentIndoorDT": req.dengueTeam._id
             })
         } else {
-            req.polioDay = await PolioDay.findOne({ "assignedDengueTeam.currentOutdoorDT": req.dengueTeam._id })
+            req.polioDay = await PolioDay.find({ "assignedDengueTeam.currentOutdoorDT": req.dengueTeam._id })
         }
 
         if (req.user, req.fetchedUC && req.dengueTeam && req.polioDay) {

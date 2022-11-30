@@ -142,13 +142,12 @@ export const createNewHouse = async (req, res, next) => {
             //* Getting information from the body
             const dhNo = req.body.dhNo
             const polioHouseNo = req.body.polioHouseNo
-            const residentName = req.body.residentName
-            const residentContact = req.body.residentContact
             const storeys = req.body.storeys
             const houseHolds = req.body.houseHolds
             const long = req.body.long
             const lat = req.body.lat
             const location = { type: "Point", coordinates: [long, lat] }
+            const createdBy = req.user._id
             //* Logic for getting image, saving file in folder and path in database
             //! Uncomment while implementing api call from frontend
             // let houseFrontImg = req.file
@@ -162,13 +161,16 @@ export const createNewHouse = async (req, res, next) => {
 
             //* Creating house with information from body and image path
             //! add houseFrontImg when uncommenting above block
-            const house = await House.create({ dhNo, polioHouseNo, residentName, residentContact, storeys, location })
+            const house = await House.create({ dhNo, polioHouseNo, storeys, location, createdBy })
 
             //* Creating Households based on the data provided and referencing to the house created above
             console.log("HouseHolds", houseHolds.length)
             if (houseHolds.length > 0) {
                 for (const houseHold of houseHolds) {
-                    const hHold = await HouseHold.create({})
+                    const residentName = houseHold.residentName
+                    const residentContact = houseHold.residentContact
+                    const residentType = houseHold.residentType
+                    const hHold = await HouseHold.create({ residentName, residentContact, residentType, createdBy })
                     if (houseHold.persons.length > 0) {
                         for (const person of houseHold.persons) {
                             console.log(person)
@@ -189,6 +191,113 @@ export const createNewHouse = async (req, res, next) => {
             return next(new ErrorResponse("Create New House: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
         }
     } catch (error) {
-        return next(new ErrorResponse("Create new Street: Requested Operation Failed", 409))
+        return next(new ErrorResponse("Create new House: Requested Operation Failed", 409))
+    }
+}
+
+//. 3rd Route: Uptade House
+export const updateHouse = async (req, res, next) => {
+    const { foundPolioDay, foundHouse } = await getData(req.body.houseID)
+    const polioDays = req.polioDay
+    const checked = polioDays.filter(checkIDMatch)
+
+    function checkIDMatch(polioDays) {
+        console.log("Received")
+        if (polioDays._id.equals(foundPolioDay._id)) {
+            console.log("Polio Day found")
+            return true
+        } else {
+            console.log("Polio Day Not found")
+        }
+        return false
+    }
+    try {
+        //* Authenticating if the reporting team is assigned to the polio day or not
+        //* Authenticity of the team already checked in isTeam middleware in routes
+        if (checked) {
+            //* Updating details based on the request
+            const dhNo = req.body.dhNo
+            if (dhNo) {
+                foundHouse.dhNo = dhNo
+                await foundHouse.save()
+            }
+            const polioHouseNo = req.body.polioHouseNo
+            if (polioHouseNo) {
+                foundHouse.polioHouseNo = polioHouseNo
+                await foundHouse.save()
+            }
+            const storeys = req.body.storeys
+            if (storeys) {
+                foundHouse.storeys = storeys
+                await foundHouse.save()
+            }
+
+            //* Will not update location, image or createdBy. Use delete for that purpose
+
+
+            res.status(200).json("House Update: Operation successful")
+
+        } else {
+            return next(new ErrorResponse("House Update: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
+        }
+    } catch (error) {
+        return next(new ErrorResponse("House Update: Requested Operation Failed", 409))
+    }
+}
+
+//. 4th Route: Uptade HouseHold
+export const updateHouseHold = async (req, res, next) => {
+    const { foundPolioDay, foundHouseHold } = await getData(req.body.houseHoldID)
+    const polioDays = req.polioDay
+    const checked = polioDays.filter(checkIDMatch)
+
+    function checkIDMatch(polioDays) {
+        console.log("Received")
+        if (polioDays._id.equals(foundPolioDay._id)) {
+            console.log("Polio Day found")
+            return true
+        } else {
+            console.log("Polio Day Not found")
+        }
+        return false
+    }
+    try {
+        //* Authenticating if the reporting team is assigned to the polio day or not
+        //* Authenticity of the team already checked in isTeam middleware in routes
+        //* Updating Households based on the data provided and referencing to the house created above
+        if (checked) {
+            const residentName = req.body.residentName
+            if (residentName) {
+                foundHouseHold.residentName = residentName
+                await foundHouseHold.save()
+            }
+            const residentContact = req.body.residentContact
+            if (residentContact) {
+                foundHouseHold.residentContact = residentContact
+                await foundHouseHold.save()
+            }
+            const residentType = req.body.residentType
+            if (residentType) {
+                foundHouseHold.residentType = residentType
+                await foundHouseHold.save()
+            }
+            console.log("Reached", req.body.persons)
+            if (req.body.persons) {
+                if (req.body.persons.length > 0) {
+                    foundHouseHold.persons = []
+                    for (const person of req.body.persons) {
+                        console.log(person)
+                        foundHouseHold.persons.push(person)
+                    }
+                    await foundHouseHold.save()
+                }
+            }
+            res.status(200).json("Household Update: Operation successful")
+
+        } else {
+            return next(new ErrorResponse("Household Updated: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
+        }
+    } catch (error) {
+        return next(new ErrorResponse("Household Update: Requested Operation Failed", 409))
     }
 }

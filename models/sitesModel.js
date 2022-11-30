@@ -23,8 +23,6 @@ export const Spot = mongoose.model("spot", spotSchema);
 const houseSchema = new Schema({
     dhNo: { type: String, required: true },
     polioHouseNo: { type: String, required: true },
-    residentName: { type: String, required: true },
-    residentContact: { type: String, required: true },
     storeys: { type: Number, required: true },
     houseFrontImg: {
         type: String,
@@ -44,16 +42,27 @@ const houseSchema = new Schema({
             type: [Number],
             index: '2dsphere'
         }
-    }
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    lastUpdated: [{
+        lastUpdatedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        updatedOn: { type: Date, default: Date.now }
+    }]
 },
     { timestamps: true })
 
 export const House = mongoose.model("house", houseSchema);
 
 const houseHoldSchema = new Schema({
-    members: {
-        type: String
-    },
+    residentName: { type: String, required: true },
+    residentContact: { type: String, required: true },
+    residentType: { type: String, required: true, enum: ['Owner', 'Tenant'] },
     persons: [{
         age: {
             type: Number,
@@ -66,6 +75,18 @@ const houseHoldSchema = new Schema({
             type: Date,
         }
     }],
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    lastUpdated: [{
+        lastUpdatedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        updatedOn: { type: Date, default: Date.now }
+    }]
+
 },
     { timestamps: true })
 
