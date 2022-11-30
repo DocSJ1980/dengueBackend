@@ -135,10 +135,23 @@ export const fillPolioDay = async (req, res, next) => {
 //. 2nd Route: Create New House
 export const createNewHouse = async (req, res, next) => {
     const { foundUC, foundAic, foundPolioTeam, foundPolioDay } = await getData(req.body.polioDayID)
+    const polioDays = req.polioDay
+    const checked = polioDays.filter(checkIDMatch)
+
+    function checkIDMatch(polioDays) {
+        console.log("Received")
+        if (polioDays._id.equals(foundPolioDay._id)) {
+            console.log("Polio Day found")
+            return true
+        } else {
+            console.log("Polio Day Not found")
+        }
+        return false
+    }
     try {
         //* Authenticating if the reporting team is assigned to the polio day or not
         //* Authenticity of the team already checked in isTeam middleware in routes
-        if (req.polioDay._id.equals(foundPolioDay._id)) {
+        if (checked) {
             //* Getting information from the body
             const dhNo = req.body.dhNo
             const polioHouseNo = req.body.polioHouseNo
@@ -295,9 +308,88 @@ export const updateHouseHold = async (req, res, next) => {
             res.status(200).json("Household Update: Operation successful")
 
         } else {
-            return next(new ErrorResponse("Household Updated: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
+            return next(new ErrorResponse("Household Update: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
         }
     } catch (error) {
         return next(new ErrorResponse("Household Update: Requested Operation Failed", 409))
     }
+}
+
+//. 5th Route: Delete HouseHold
+export const deleteHouse = async (req, res, next) => {
+    const { foundPolioDay, foundHouse } = await getData(req.body.houseID)
+    const polioDays = req.polioDay
+    const checked = polioDays.filter(checkIDMatch)
+
+    function checkIDMatch(polioDays) {
+        console.log("Received")
+        if (polioDays._id.equals(foundPolioDay._id)) {
+            console.log("Polio Day found")
+            return true
+        } else {
+            console.log("Polio Day Not found")
+        }
+        return false
+    }
+    try {
+        //* Authenticating if the reporting team is assigned to the polio day or not
+        //* Authenticity of the team already checked in isTeam middleware in routes
+        if (checked) {
+            //TODO: Delete Image from storage functionality needs to be implemented
+            if (foundHouse.houseHolds.length > 0) {
+                return next(new ErrorResponse("House Delete: Requested Operation Failed (HouseHolds Present, you need to delete those first ).", 401))
+            }
+            await House.findByIdAndDelete(req.body.houseID)
+            res.status(200).json("House Delete: Operation successful")
+
+        } else {
+            return next(new ErrorResponse("House Delete: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
+        }
+    } catch (error) {
+        return next(new ErrorResponse("House Delete: Requested Operation Failed", 409))
+    }
+}
+
+//. 6th Route: Delete HouseHold
+export const deleteHouseHold = async (req, res, next) => {
+    const { foundPolioDay, foundHouse, foundHouseHold } = await getData(req.body.houseHoldID)
+    const polioDays = req.polioDay
+    const checked = polioDays.filter(checkIDMatch)
+
+    function checkIDMatch(polioDays) {
+        console.log("Received")
+        if (polioDays._id.equals(foundPolioDay._id)) {
+            console.log("Polio Day found")
+            return true
+        } else {
+            console.log("Polio Day Not found")
+        }
+        return false
+    }
+    try {
+        //* Authenticating if the reporting team is assigned to the polio day or not
+        //* Authenticity of the team already checked in isTeam middleware in routes
+        //* Updating Households based on the data provided and referencing to the house created above
+        if (checked) {
+            console.log(foundHouse)
+            foundHouse.houseHolds = removeItemOnce(foundHouse.houseHolds, req.body.houseHoldID)
+            await foundHouse.save()
+            await HouseHold.findByIdAndDelete(req.body.houseHoldID)
+            res.status(200).json("Household Delete: Operation successful")
+
+        } else {
+            return next(new ErrorResponse("Household Delete: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
+        }
+    } catch (error) {
+        return next(new ErrorResponse("Household Delete: Requested Operation Failed", 409))
+    }
+}
+
+//*function for removing value from array
+function removeItemOnce(arr, value) {
+    var index = arr.indexOf(value);
+    if (index > -1) {
+        arr.splice(index, 1);
+    }
+    return arr;
 }
