@@ -244,7 +244,9 @@ export const updateHouse = async (req, res, next) => {
                 foundHouse.storeys = storeys
                 await foundHouse.save()
             }
-
+            const lastUpdatedBy = req.user._id
+            foundHouse.lastUpdated.push(lastUpdatedBy)
+            await foundHouse.save()
             //* Will not update location, image or createdBy. Use delete for that purpose
 
 
@@ -305,6 +307,9 @@ export const updateHouseHold = async (req, res, next) => {
                     await foundHouseHold.save()
                 }
             }
+            const lastUpdatedBy = req.user._id
+            foundHouse.lastUpdated.push(lastUpdatedBy)
+            await foundHouseHold.save()
             res.status(200).json("Household Update: Operation successful")
 
         } else {
