@@ -1,6 +1,6 @@
 // Imports (express, named imports from userControlller)
 import express, { Router } from "express"
-import { createNewHouse, createNewSpot, deleteHouse, deleteHouseHold, fillPolioDay, updateHouse, updateHouseHold, updateSpot } from "../controllers/polioDayController.js"
+import { createNewHouse, createNewSpot, deleteHouse, deleteHouseHold, deleteSpot, fillPolioDay, updateHouse, updateHouseHold, updateSpot } from "../controllers/polioDayController.js"
 import { isAic } from "../middleware/aicAuth.js";
 import { isTeam } from "../middleware/teamAuth.js";
 import { uploadImg } from "../utils/imgUploader.js";
@@ -18,6 +18,7 @@ router.post("/spot/new", isTeam, uploadImg.single('spotFrontImg'), createNewSpot
 router.post("/house/update", isTeam, updateHouse)
 router.post("/spot/update", isTeam, updateSpot)
 router.delete("/house/delete", isTeam, deleteHouse)
+router.delete("/spot/delete", isTeam, deleteSpot)
 router.post("/household/update", isTeam, updateHouseHold)
 router.delete("/household/delete", isTeam, deleteHouseHold)
 

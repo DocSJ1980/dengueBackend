@@ -320,7 +320,7 @@ export const updateHouseHold = async (req, res, next) => {
     }
 }
 
-//. 5th Route: Delete HouseHold
+//. 5th Route: Delete House
 export const deleteHouse = async (req, res, next) => {
     const { foundPolioDay, foundHouse } = await getData(req.body.houseID)
     const polioDays = req.polioDay
@@ -520,6 +520,42 @@ export const updateSpot = async (req, res, next) => {
         return next(new ErrorResponse("Spot Update: Requested Operation Failed", 409))
     }
 }
+
+//. 9th Route: Delete Spot
+export const deleteSpot = async (req, res, next) => {
+    const { foundPolioDay, foundSpot } = await getData(req.body.spotID)
+    const polioDays = req.polioDay
+    const checked = polioDays.filter(checkIDMatch)
+
+    function checkIDMatch(polioDays) {
+        console.log("Received")
+        if (polioDays._id.equals(foundPolioDay._id)) {
+            console.log("Polio Day found")
+            return true
+        } else {
+            console.log("Polio Day Not found")
+        }
+        return false
+    }
+    try {
+        //* Authenticating if the reporting team is assigned to the polio day or not
+        //* Authenticity of the team already checked in isTeam middleware in routes
+        //* Deleting Spots based on the data provided and removing reference in the polio day
+        if (checked && req.dengueTeam.teamType === 'Outdoor') {
+            console.log(foundSpot)
+            foundPolioDay.spots = removeItemOnce(foundPolioDay.spots, req.body.spotID)
+            await foundPolioDay.save()
+            await Spot.findByIdAndDelete(req.body.spotID)
+            res.status(200).json("Spot Delete: Operation successful")
+
+        } else {
+            return next(new ErrorResponse("Spot Delete: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
+        }
+    } catch (error) {
+        return next(new ErrorResponse("Spot Delete: Requested Operation Failed", 409))
+    }
+}
+
 
 
 
