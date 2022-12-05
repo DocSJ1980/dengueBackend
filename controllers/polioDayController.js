@@ -390,6 +390,10 @@ export const deleteHouseHold = async (req, res, next) => {
     }
 }
 
+
+
+
+
 //*function for removing value from array
 function removeItemOnce(arr, value) {
     var index = arr.indexOf(value);

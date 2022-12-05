@@ -1,5 +1,8 @@
 // Importing express server, router, middleware i.e. fetchuser, models i.e. Notes and express validator
+import { response } from "express";
 import SimpleActivity from "../models/simplesModel.js"
+import UC from "../models/ucModel.js";
+import User from "../models/userModel.js";
 import ErrorResponse from "../utils/Error.js"
 
 //FIRST ROUTE: Get all the simple activities
@@ -124,10 +127,54 @@ export const batchSimples = async (req, res, next) => {
     const { allActivities } = req.body
     // console.log(allActivities)
     try {
-        const insertedSimples = await SimpleActivity.insertMany(allActivities)
+        // const insertedSimples = await SimpleActivity.insertMany(allActivities)
         const countActivities = allActivities.length
-        return res.status(200).json(`Batch of ${countActivities} Simple Activities have been inserted`)
+        let i = 0
+        let notSubmitted = 0
+        let activitySubmitted = 0
+        while (i < countActivities) {
+            try {
+                await SimpleActivity.create(allActivities[i])
+                activitySubmitted++
+                console.log("Submitted: ", activitySubmitted)
+            } catch (error) {
+                notSubmitted++
+                console.log("Not Submitte: ", notSubmitted)
+            }
+            i++
+        }
+        return res.status(200).json(`Activities submitted = ${activitySubmitted} Activities not submitted = ${notSubmitted}`)
     } catch (error) {
-        return next(new ErrorResponse("Failed to batch create UCs", 400))
+        return next(new ErrorResponse("Failed to batch submit simple activities", 400))
     }
+}
+
+//. 6th Route: Get all simple activities from UCs indoor and outdoor teams
+
+export const getAllSimples = async (req, res, next) => {
+    const page = req.query.page || 0
+    const activitiesPerPage = 20
+    console.log("request received for Page: " + page)
+    const ucList = await UC.find({
+        $or: [
+            { "supervisor.currentSuper": req.user._id },
+            { "ento.currentEnto": req.user._id },
+            { "townEnto.currentTownEnto": req.user._id },
+            { "ddho.currentDdho": req.user._id },
+            { "currentMembers": req.user._id },
+        ]
+    })
+    const ucMembers = []
+    for (const uc of ucList) {
+        for (const member of uc.currentMembers) {
+            const memberCNIC = await User.findOne({ _id: member }, { cnic: 1 })
+            ucMembers.push(memberCNIC.cnic)
+        }
+    }
+    console.log(ucMembers)
+    const activities = await SimpleActivity
+        .find({ userName: { $in: ucMembers } })
+        .skip(page * activitiesPerPage)
+        .limit(activitiesPerPage)
+    return res.status(200).json(activities)
 }

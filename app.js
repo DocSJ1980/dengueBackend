@@ -23,12 +23,10 @@ config({
 const app = express()
 const port = process.env.PORT
 const URI = process.env.URI
-// const upload = multer()
 
 //. Middlewares
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-// app.use(upload.array())
 app.use(cookieParser())
 
 //. Using routes

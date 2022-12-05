@@ -85,6 +85,7 @@ export const verify = async (req, res, next) => {
 
 //. THIRD ROUTE: Login controller
 export const login = async (req, res, next) => {
+    console.log("request received")
     const { email, password } = req.body;
 
     if (!email || !password) {
