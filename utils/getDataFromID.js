@@ -1,7 +1,7 @@
 import { Aic, PolioDay, PolioTeam } from "../models/polioTeamModel.js"
-import { House, HouseHold } from "../models/sitesModel.js"
+import { House, HouseHold, Spot } from "../models/sitesModel.js"
 import UC from "../models/ucModel.js"
-let foundUC, foundAic, foundPolioTeam, foundPolioDay, foundHouse, foundHouseHold
+let foundUC, foundAic, foundPolioTeam, foundPolioDay, foundHouse, foundHouseHold, foundSpot
 
 export const getData = async (id) => {
     console.log("get data function called", id)
@@ -9,7 +9,8 @@ export const getData = async (id) => {
     if (!foundHouseHold) {
         console.log("IF-0 reached")
         foundHouse = await House.findById(id)
-        if (!foundHouse) {
+        foundSpot = await Spot.findById(id)
+        if (!foundHouse && !foundSpot) {
             foundPolioDay = await PolioDay.findById(id)
             if (!foundPolioDay) {
                 console.log("IF-2 reached")
@@ -47,13 +48,22 @@ export const getData = async (id) => {
                 return { foundUC, foundAic, foundPolioTeam, foundPolioDay }
             }
         } else {
-            console.log("Else-1 reached")
-            foundPolioDay = await PolioDay.findOne({ houses: foundHouse._id })
-            foundPolioTeam = await PolioTeam.findOne({ polioDays: foundPolioDay._id })
-            foundAic = await Aic.findOne({ "polioTeams.mobilePolioTeams": foundPolioTeam._id })
-            foundUC = await UC.findOne({ "polioSubUCs.aic": foundAic._id })
-            console.log(foundUC.survUC, foundAic.aicNumber, foundPolioTeam.teamNo, foundPolioDay.dayNo)
-            return { foundUC, foundAic, foundPolioTeam, foundPolioDay, foundHouse }
+            if (foundHouse) {
+                console.log("Else-1 reached")
+                foundPolioDay = await PolioDay.findOne({ houses: foundHouse._id })
+                foundPolioTeam = await PolioTeam.findOne({ polioDays: foundPolioDay._id })
+                foundAic = await Aic.findOne({ "polioTeams.mobilePolioTeams": foundPolioTeam._id })
+                foundUC = await UC.findOne({ "polioSubUCs.aic": foundAic._id })
+                console.log(foundUC.survUC, foundAic.aicNumber, foundPolioTeam.teamNo, foundPolioDay.dayNo)
+                return { foundUC, foundAic, foundPolioTeam, foundPolioDay, foundHouse }
+            } else {
+                console.log("Else-1 reached")
+                foundPolioDay = await PolioDay.findOne({ spots: foundSpot._id })
+                foundPolioTeam = await PolioTeam.findOne({ polioDays: foundPolioDay._id })
+                foundAic = await Aic.findOne({ "polioTeams.mobilePolioTeams": foundPolioTeam._id })
+                foundUC = await UC.findOne({ "polioSubUCs.aic": foundAic._id })
+                return { foundUC, foundAic, foundPolioTeam, foundPolioDay, foundSpot }
+            }
         }
     } else {
         console.log("Else-0 reached")

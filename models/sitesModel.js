@@ -6,15 +6,31 @@ const spotSchema = new Schema({
     occupantName: { type: String, required: true },
     occupantContact: { type: String, required: true },
     storeys: { type: Number, required: true },
-    spotFrontImg: { type: String, required: true },
+    spotFrontImg: { type: String },
+    location: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: "Point"
+        },
+        coordinates: {
+            type: [Number],
+            index: '2dsphere'
+        }
+    },
     timeReqForVisit: { type: Number, required: true },
     spotType: { type: String, required: true },
     larvicidingRequired: {
         type: String,
         enum: ['Yes', 'No'],
-        required: true
-    }
-
+    },
+    lastUpdated: [{
+        lastUpdatedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        updatedOn: { type: Date, default: Date.now }
+    }]
 },
     { timestamps: true })
 

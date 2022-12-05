@@ -6,7 +6,7 @@ import fs from 'fs'
 import { URL } from "url"
 import { getData } from "../utils/getDataFromID.js";
 import { filePath } from "../utils/filePath.js";
-import { House, HouseHold } from "../models/sitesModel.js"
+import { House, HouseHold, Spot } from "../models/sitesModel.js"
 
 //. FIRST ROUTE: Add details to Dengue Day
 export const fillPolioDay = async (req, res, next) => {
@@ -151,7 +151,7 @@ export const createNewHouse = async (req, res, next) => {
     try {
         //* Authenticating if the reporting team is assigned to the polio day or not
         //* Authenticity of the team already checked in isTeam middleware in routes
-        if (checked) {
+        if (checked && req.dengueTeam.teamType === 'Indoor') {
             //* Getting information from the body
             const dhNo = req.body.dhNo
             const polioHouseNo = req.body.polioHouseNo
@@ -201,7 +201,7 @@ export const createNewHouse = async (req, res, next) => {
             res.status(200).json("Create new House: Operation successful")
 
         } else {
-            return next(new ErrorResponse("Create New House: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
+            return next(new ErrorResponse("Create New House: Requested Operation Failed (You are not assigned as Indoor dengue team to this polio day).", 401))
         }
     } catch (error) {
         return next(new ErrorResponse("Create new House: Requested Operation Failed", 409))
@@ -227,7 +227,7 @@ export const updateHouse = async (req, res, next) => {
     try {
         //* Authenticating if the reporting team is assigned to the polio day or not
         //* Authenticity of the team already checked in isTeam middleware in routes
-        if (checked) {
+        if (checked && req.dengueTeam.teamType === 'Indoor') {
             //* Updating details based on the request
             const dhNo = req.body.dhNo
             if (dhNo) {
@@ -280,7 +280,7 @@ export const updateHouseHold = async (req, res, next) => {
         //* Authenticating if the reporting team is assigned to the polio day or not
         //* Authenticity of the team already checked in isTeam middleware in routes
         //* Updating Households based on the data provided and referencing to the house created above
-        if (checked) {
+        if (checked && req.dengueTeam.teamType === 'Indoor') {
             const residentName = req.body.residentName
             if (residentName) {
                 foundHouseHold.residentName = residentName
@@ -339,7 +339,7 @@ export const deleteHouse = async (req, res, next) => {
     try {
         //* Authenticating if the reporting team is assigned to the polio day or not
         //* Authenticity of the team already checked in isTeam middleware in routes
-        if (checked) {
+        if (checked && req.dengueTeam.teamType === 'Indoor') {
             //TODO: Delete Image from storage functionality needs to be implemented
             if (foundHouse.houseHolds.length > 0) {
                 return next(new ErrorResponse("House Delete: Requested Operation Failed (HouseHolds Present, you need to delete those first ).", 401))
@@ -375,7 +375,7 @@ export const deleteHouseHold = async (req, res, next) => {
         //* Authenticating if the reporting team is assigned to the polio day or not
         //* Authenticity of the team already checked in isTeam middleware in routes
         //* Updating Households based on the data provided and referencing to the house created above
-        if (checked) {
+        if (checked && req.dengueTeam.teamType === 'Indoor') {
             console.log(foundHouse)
             foundHouse.houseHolds = removeItemOnce(foundHouse.houseHolds, req.body.houseHoldID)
             await foundHouse.save()
@@ -387,6 +387,137 @@ export const deleteHouseHold = async (req, res, next) => {
         }
     } catch (error) {
         return next(new ErrorResponse("Household Delete: Requested Operation Failed", 409))
+    }
+}
+
+//. 7th Route: Create New Spot
+export const createNewSpot = async (req, res, next) => {
+    const { foundUC, foundAic, foundPolioTeam, foundPolioDay } = await getData(req.body.polioDayID)
+    const polioDays = req.polioDay
+    const checked = polioDays.filter(checkIDMatch)
+
+    function checkIDMatch(polioDays) {
+        console.log("Received")
+        if (polioDays._id.equals(foundPolioDay._id)) {
+            console.log("Polio Day found")
+            return true
+        } else {
+            console.log("Polio Day Not found")
+        }
+        return false
+    }
+    try {
+        //* Authenticating if the reporting team is assigned to the polio day or not
+        //* Authenticity of the team already checked in isTeam middleware in routes
+        if (checked && req.dengueTeam.teamType === 'Outdoor') {
+            //* Getting information from the body
+            const dsNo = req.body.dsNo
+            const occupantName = req.body.occupantName
+            const occupantContact = req.body.occupantContact
+            const storeys = req.body.storeys
+            const timeReqForVisit = req.body.timeReqForVisit
+            const spotType = req.body.spotType
+            const larvicidingRequired = req.body.larvicidingRequired
+            const long = req.body.long
+            const lat = req.body.lat
+            const location = { type: "Point", coordinates: [long, lat] }
+            const createdBy = req.user._id
+            //* Logic for getting image, saving file in folder and path in database
+            //! Uncomment while implementing api call from frontend
+            // let spotFrontImg = req.file
+            // const ext = path.extname(spotFrontImg.originalname)
+            // const imgName = Date.now() + ext
+            // const imgType = "Spots"
+            // const spotImgPath = await filePath(foundUC, foundAic, foundPolioTeam, foundPolioDay, imgType) + imgName
+            // await fs.promises.writeFile(spotImgPath, spotFrontImg.buffer)
+            // spotFrontImg = spotImgPath
+            console.log("Working: " + dsNo, occupantName, occupantContact, storeys, location, timeReqForVisit, spotType, larvicidingRequired, createdBy)
+
+            //* Creating spot with information from body and image path
+            //! add spotFrontImg when uncommenting above block
+            const spot = await Spot.create({ dsNo, occupantName, occupantContact, storeys, location, timeReqForVisit, spotType, larvicidingRequired, createdBy })
+
+            foundPolioDay.spots.push(spot._id)
+            await foundPolioDay.save()
+            res.status(200).json("Create new Spot: Operation successful")
+
+        } else {
+            return next(new ErrorResponse("Create New Spot: Requested Operation Failed (You are not assigned as outdoor dengue team to this polio day).", 401))
+        }
+    } catch (error) {
+        return next(new ErrorResponse("Create new Spot: Requested Operation Failed", 409))
+    }
+}
+
+//. 8th Route: Uptade Spot
+export const updateSpot = async (req, res, next) => {
+    const { foundPolioDay, foundSpot } = await getData(req.body.spotID)
+    const polioDays = req.polioDay
+    const checked = polioDays.filter(checkIDMatch)
+
+    function checkIDMatch(polioDays) {
+        console.log("Received")
+        if (polioDays._id.equals(foundPolioDay._id)) {
+            console.log("Polio Day found")
+            return true
+        } else {
+            console.log("Polio Day Not found")
+        }
+        return false
+    }
+    try {
+        //* Authenticating if the reporting team is assigned to the polio day or not
+        //* Authenticity of the team already checked in isTeam middleware in routes
+        if (checked && req.dengueTeam.teamType === 'Outdoor') {
+            //* Updating details based on the request
+            const dsNo = req.body.dsNo
+            if (dsNo) {
+                foundSpot.dsNo = dsNo
+                await foundSpot.save()
+            }
+            const storeys = req.body.storeys
+            if (storeys) {
+                foundSpot.storeys = storeys
+                await foundSpot.save()
+            }
+            const occupantName = req.body.occupantName
+            if (occupantName) {
+                foundSpot.occupantName = occupantName
+                await foundSpot.save()
+            }
+            const occupantContact = req.body.occupantContact
+            if (occupantContact) {
+                foundSpot.occupantContact = occupantContact
+                await foundSpot.save()
+            }
+            const timeReqForVisit = req.body.timeReqForVisit
+            if (timeReqForVisit) {
+                foundSpot.timeReqForVisit = timeReqForVisit
+                await foundSpot.save()
+            }
+            const spotType = req.body.spotType
+            if (spotType) {
+                foundSpot.spotType = spotType
+                await foundSpot.save()
+            }
+            const larvicidingRequired = req.body.larvicidingRequired
+            if (larvicidingRequired) {
+                foundSpot.larvicidingRequired = larvicidingRequired
+                await foundSpot.save()
+            }
+            const lastUpdatedBy = req.user._id
+            foundSpot.lastUpdated.push(lastUpdatedBy)
+            await foundSpot.save()
+            //* Will not update location, image or createdBy. Use delete for that purpose
+
+
+            res.status(200).json("Spot Update: Operation successful")
+
+        } else {
+            return next(new ErrorResponse("Spot Update: Requested Operation Failed (You are not assigned as dengue team to this polio day).", 401))
+        }
+    } catch (error) {
+        return next(new ErrorResponse("Spot Update: Requested Operation Failed", 409))
     }
 }
 
