@@ -26,6 +26,8 @@ const userSchema = new Schema({
         select: false,
     },
     name: { type: String },
+    fatherName: { type: String },
+    husbandName: { type: String },
     gender: {
         type: String,
         enum: ['Male', 'Female'],
@@ -52,6 +54,18 @@ const userSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "SimpleActivity"
     }],
+    residentialAddress: {
+        district: { type: String },
+        town: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "town"
+        },
+        uc: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "UC"
+        },
+        streetAdress: { type: String },
+    },
     followers: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"

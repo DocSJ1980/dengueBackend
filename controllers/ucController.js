@@ -10,10 +10,11 @@ import User from "../models/userModel.js"
 // import { Url } from "url"
 // const __dirname = new Url('.', import.meta.url).pathname
 
-//FIRST ROUTE: Get all the simple activities
+//. FIRST ROUTE: Get all the UCs for a town
 export const fetchAllUCs = async (req, res, next) => {
     try {
-        const fetchedUC = await UC.find({}, {}, { sort: { ucSort: -1 } });
+        const townID = req.body.townID
+        const fetchedUC = await UC.find({ town: townID }, { _id: 1, survUC: 1 }, { sort: { ucSort: 1 } });
         res.json(fetchedUC);
     } catch (error) {
         res.json("No UC Found")
@@ -118,7 +119,7 @@ export const batchUCs = async (req, res, next) => {
 export const fetchUC = async (req, res, next) => {
     try {
         //Finding UC with UC assigned to user as supervisor or UC member
-        let fetchedUC = await UC.findOne({ $or: [{ "supervisor.currentSuper": req.user._id }, { currentMembers: req.user._id }] })
+        let fetchedUC = await UC.find({ $or: [{ "supervisor.currentSuper": req.user._id }, { currentMembers: req.user._id }] })
 
         //Returning UC details if no polio microplan is present
         if (fetchedUC.polioSubUCs.aic.length === 0) {
@@ -149,6 +150,25 @@ export const fetchUC = async (req, res, next) => {
                 }
             }).populate({ path: 'currentMembers', model: User })
             res.json(fetchedUC);
+        }
+    } catch (error) {
+        return next(new ErrorResponse("Failed to fetch UC details", 404))
+    }
+};
+
+//SIXTH ROUTE: Get UC details of logged in user
+export const fetchMyUC = async (req, res, next) => {
+    try {
+        //Finding UC with UC assigned to user as supervisor or UC member
+        let fetchedUC = await UC.find({ $or: [{ currentMembers: req.user._id }, { "supervisor.currentSuper": req.user._id }, { "ento.currentEnto": req.user._id }, { "townEnto.currentTownEnto": req.user._id }, { "ddho.currentDdho": req.user._id }] }, { _id: 1, survUC: 1 }, { sort: { ucSort: 1 } })
+
+        //Returning UC details if no polio microplan is present
+        if (fetchedUC.length === 0) {
+            console.log("No UC Found")
+            res.json(fetchedUC);
+        } else {
+            console.log("UCs Found")
+            res.status(200).json(fetchedUC);
         }
     } catch (error) {
         return next(new ErrorResponse("Failed to fetch UC details", 404))

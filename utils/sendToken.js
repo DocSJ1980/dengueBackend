@@ -1,6 +1,8 @@
-export const sendToken = (res, foundUser, statusCode, message) => {
-    const token = foundUser.getJWTToken();
+import User from "../models/userModel.js";
 
+export const sendToken = async (res, foundUser, statusCode, message) => {
+    const token = foundUser.getJWTToken();
+    const sentUser = await User.findById(foundUser._id);
     const options = {
         httpOnly: true,
         expires: new Date(
@@ -8,18 +10,10 @@ export const sendToken = (res, foundUser, statusCode, message) => {
         ),
     };
 
-    const userData = {
-        _id: foundUser._id,
-        name: foundUser.name,
-        email: foundUser.email,
-        avatar: foundUser.avatar,
-        tasks: foundUser.tasks,
-        verified: foundUser.verified,
-    };
 
     res
         .status(statusCode)
         .cookie("token", token, options)
-        .json({ success: true, message, user: userData, token: "Bearer " + token, });
+        .json({ success: true, message, user: sentUser, token: "Bearer " + token, });
 };
 

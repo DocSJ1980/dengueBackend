@@ -194,7 +194,7 @@ export const getMyProfile = async (req, res, next) => {
     try {
         const foundUser = await User.findById(req.user._id);
 
-        sendToken(res, foundUser, 201, `Welcome back ${foundUser.username}`);
+        sendToken(res, foundUser, 201, `Welcome back ${foundUser.name}`);
     } catch (error) {
         next(new ErrorResponse("Failed to load profile", 400))
     }
@@ -203,12 +203,17 @@ export const getMyProfile = async (req, res, next) => {
 //. EIGHTH ROUTE: Update Profile Controller
 export const updateProfile = async (req, res, next) => {
     try {
-        const foundUser = await User.findById(req.user._id);
+        const foundUser = await User.findById(req.body.userId);
 
-        const { username } = req.body;
+        const { contactNo, dob, doj, residentialAddress, fatherName, husbandName } = req.body;
         //   const avatar = req.files.avatar.tempFilePath;
 
-        if (username) foundUser.username = username;
+        if (contactNo) foundUser.username = contactNo;
+        if (dob) foundUser.username = dob;
+        if (doj) foundUser.username = doj;
+        if (residentialAddress) foundUser.username = residentialAddress;
+        if (fatherName) foundUser.username = fatherName;
+        if (husbandName) foundUser.username = husbandName;
         //   if (avatar) {
         //     await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 

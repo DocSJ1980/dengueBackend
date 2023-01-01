@@ -134,12 +134,14 @@ export const batchSimples = async (req, res, next) => {
         let activitySubmitted = 0
         while (i < countActivities) {
             try {
+                const owner = await User.findOne({ cnic: allActivities[i].userName }, { _id: 1 })
+                allActivities[i].owner = owner._id
                 await SimpleActivity.create(allActivities[i])
                 activitySubmitted++
                 console.log("Submitted: ", activitySubmitted)
             } catch (error) {
                 notSubmitted++
-                console.log("Not Submitte: ", notSubmitted)
+                console.log("Not Submitted: ", notSubmitted)
             }
             i++
         }

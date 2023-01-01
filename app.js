@@ -12,6 +12,9 @@ import { connectDB } from "./config/database.js"
 import passport from "passport"
 import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
+import cors from "cors"
+import https from "https"
+import fs from "fs"
 // import multer from 'multer'
 
 //. Declaring Path for dotenv
@@ -23,8 +26,16 @@ config({
 const app = express()
 const port = process.env.PORT
 const URI = process.env.URI
+const sslServer = https.createServer({
+    key: fs.readFileSync('./config/cert/key.pem'),
+    cert: fs.readFileSync('./config/cert/cert.pem'),
+}, app)
 
 //. Middlewares
+app.use(cors({
+    credentials: true,
+    origin: true
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
@@ -42,8 +53,13 @@ app.use(express.static('images'))
 connectDB(URI)
 
 //. Running the server
-app.listen(port, () => {
-    console.log(`Server is running on port: ${port}`)
+// app.listen(port, () => {
+//     console.log(`Server is running on port: ${port}`)
+// })
+
+//. Running SSl Server
+sslServer.listen(port, () => {
+    console.log(`SSL Server is running on port: ${port}`)
 })
 
 
