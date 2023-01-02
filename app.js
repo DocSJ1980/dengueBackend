@@ -52,15 +52,15 @@ app.use(express.static('images'))
 //. Connecting Database
 connectDB(URI)
 
-//. Running the server
-// app.listen(port, () => {
-//     console.log(`Server is running on port: ${port}`)
-// })
+//. Running http server
+app.listen(port, () => {
+    console.log(`Server is running on port: ${port}`)
+})
 
 //. Running SSl Server
-sslServer.listen(port, () => {
-    console.log(`SSL Server is running on port: ${port}`)
-})
+// sslServer.listen(port, () => {
+//     console.log(`SSL Server is running on port: ${port}`)
+// })
 
 
 //. Initialize passport

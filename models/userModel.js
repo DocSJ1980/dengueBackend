@@ -99,10 +99,17 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-// Creating JWT token for cookie
-userSchema.methods.getJWTToken = function () {
+// Creating refresh token for cookie
+userSchema.methods.getRefreshToken = function () {
     return jwt.sign({ _id: this._id, username: this.username }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000,
+    });
+};
+
+// Creating JWT token for cookie
+userSchema.methods.getAccessToken = function () {
+    return jwt.sign({ _id: this._id, username: this.username }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_COOKIE_EXPIRE * 60 * 1000,
     });
 };
 

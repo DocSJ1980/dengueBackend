@@ -6,6 +6,7 @@ import { isAuthenticated } from "../middleware/auth.js";
 import { isSuper } from "../middleware/superAuth.js";
 import { isTownEnto } from "../middleware/townEntoAuth.js";
 import { upload } from "../utils/csvUploader.js"
+import { sendRefreshToken } from "../utils/refreshToken.js";
 
 // Consts (initializing router)
 const router = express.Router()
@@ -14,6 +15,7 @@ const router = express.Router()
 router.post("/new", newUser)
 router.post("/login", login)
 router.get("/logout", logout)
+router.get("/refresh", sendRefreshToken)
 router.post("/forgotpassword", forgotPassword)
 router.post("/restpassword", resetPassword)
 
