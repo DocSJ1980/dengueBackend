@@ -41,12 +41,12 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 //. Using routes
-app.use("/user", userRouter)
-app.use("/simples", simplesRouter)
-app.use("/uc", ucRouter)
-app.use("/town", townRouter)
-app.use("/teams", teamRouter)
-app.use("/polioday", polioDayRouter)
+app.use("/api/v1/user", userRouter)
+app.use("/api/v1/simples", simplesRouter)
+app.use("/api/v1/uc", ucRouter)
+app.use("/api/v1/town", townRouter)
+app.use("/api/v1/teams", teamRouter)
+app.use("/api/v1/polioday", polioDayRouter)
 app.use(express.static('images'))
 
 //. Connecting Database

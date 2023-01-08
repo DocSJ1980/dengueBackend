@@ -167,7 +167,7 @@ export const fetchMyUC = async (req, res, next) => {
             console.log("No UC Found")
             res.json(fetchedUC);
         } else {
-            console.log("UCs Found")
+            console.log(fetchedUC)
             res.status(200).json(fetchedUC);
         }
     } catch (error) {
