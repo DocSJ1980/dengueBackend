@@ -47,6 +47,7 @@ app.use("/api/v1/uc", ucRouter)
 app.use("/api/v1/town", townRouter)
 app.use("/api/v1/teams", teamRouter)
 app.use("/api/v1/polioday", polioDayRouter)
+app.use(express.static('dist'))
 app.use(express.static('images'))
 
 //. Connecting Database
