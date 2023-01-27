@@ -26,10 +26,10 @@ config({
 const app = express()
 const port = process.env.PORT
 const URI = process.env.URI
-const sslServer = https.createServer({
-    key: fs.readFileSync('./config/cert/key.pem'),
-    cert: fs.readFileSync('./config/cert/cert.pem'),
-}, app)
+// const sslServer = https.createServer({
+//     key: fs.readFileSync('./config/cert/key.pem'),
+//     cert: fs.readFileSync('./config/cert/cert.pem'),
+// }, app)
 
 //. Middlewares
 app.use(cors({
