@@ -109,7 +109,8 @@ userSchema.methods.getRefreshToken = function () {
 // Creating JWT token for cookie
 userSchema.methods.getAccessToken = function () {
     return jwt.sign({ _id: this._id, username: this.name, desig: this.desig, jobType: this.jobType }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_COOKIE_EXPIRE * 60 * 1000,
+        expiresIn: process.env.JWT_EXPIRE * 1000
+        // * 60 * 1000,
     });
 };
 
