@@ -6,9 +6,9 @@ export const isTownEnto = async (req, res, next) => {
     const authHeader = req.headers.authorization || req.headers.Authorization
 
     if (!authHeader?.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Unauthorized' })
+        return res.status(403).json({ message: 'Unauthorized' })
     }
-
+    console.log(authHeader)
     const accessToken = authHeader.split(' ')[1]
     jwt.verify(
         accessToken,
@@ -18,6 +18,7 @@ export const isTownEnto = async (req, res, next) => {
             if (err) return res.status(403).json({ success: false, message: 'Forbidden' })
             req.user = await User.findById(decoded._id);
             if (req.user.desig === "DDHO" || req.user.desig === "Entomologist") {
+                // console.log(req.user.desig)
                 // Check the logic of the above if statement and refactor if required
                 next()
             } else {
