@@ -10,7 +10,6 @@ export const setSuper = async (req, res, next) => {
     const superv = await User.findById(req.body.superID)
     const uc = await UC.findById(req.body.UCID)
     const checkUC = await UC.findOne({ "supervisor.currentSuper": req.body.superID })
-    const alreadySuper = await User.findById(uc.supervisor.currentSuper)
 
     try {
         //Checking if provided ID for the supervisor exists in our user database
@@ -34,14 +33,6 @@ export const setSuper = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 message: `${superv.name} is already supervisor of ${uc.survUC}`
-            })
-        }
-        // Checking if provided ID for the supervisor is already the supervisor of the any UC
-        else if (alreadySuper) {
-            console.log("super check reached")
-            return res.status(200).json({
-                success: true,
-                message: `${superv.name} is already supervisor of ${checkUC.survUC}`
             })
         }
         // Assigning the provided ID for the supervisor as supervisor of the provided UC in a condition when there is already assigned supervisor

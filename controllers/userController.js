@@ -316,6 +316,7 @@ export const batchUsers = async (req, res, next) => {
 //. 11th ROUTE: Search staff based on multiple fields
 export const searchStaff = async (req, res, next) => {
     try {
+        console.log(req.params.key)
         // Simple route self explanatory
         // console.log("block reached")
         const staff = await User.find({
