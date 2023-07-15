@@ -4,6 +4,7 @@ import SimpleActivity from "../models/simplesModel.js"
 import UC from "../models/ucModel.js";
 import User from "../models/userModel.js";
 import ErrorResponse from "../utils/Error.js"
+import res from "express/lib/response.js";
 
 //FIRST ROUTE: Get all the simple activities
 export const fetchAllSimpleActivities = async (req, res, next) => {
@@ -125,6 +126,7 @@ export const deleteSimpleActivity = async (req, res) => {
 // Fifth Route: batch submit simples activities
 export const batchSimples = async (req, res, next) => {
     const { allActivities } = req.body
+    console.log("countActivities: ", allActivities.length)
     // console.log(allActivities)
     try {
         // const insertedSimples = await SimpleActivity.insertMany(allActivities)
@@ -134,14 +136,14 @@ export const batchSimples = async (req, res, next) => {
         let activitySubmitted = 0
         while (i < countActivities) {
             try {
-                const owner = await User.findOne({ cnic: allActivities[i].userName }, { _id: 1 })
-                allActivities[i].owner = owner._id
+                // const owner = await User.findOne({ cnic: allActivities[i].userName }, { _id: 1 })
+                // allActivities[i].owner = owner._id
                 await SimpleActivity.create(allActivities[i])
                 activitySubmitted++
-                console.log("Submitted: ", activitySubmitted)
+                // console.log("Submitted: ", activitySubmitted)
             } catch (error) {
                 notSubmitted++
-                console.log("Not Submitted: ", notSubmitted)
+                // console.log("Not Submitted: ", notSubmitted)
             }
             i++
         }
@@ -179,4 +181,23 @@ export const getAllSimples = async (req, res, next) => {
         .skip(page * activitiesPerPage)
         .limit(activitiesPerPage)
     return res.status(200).json(activities)
+}
+
+export const getLastActivityDate = async (req, res) => {
+    try {
+        const lastActivity = await SimpleActivity.findOne({}, { dateSubmitted: 1 })
+            .sort({ dateSubmitted: -1 })
+            .lean();
+        if (lastActivity) {
+            const lastActivityDate = lastActivity.dateSubmitted;
+            // Use the lastActivityDate as needed
+            return res.status(200).json(lastActivityDate);
+        } else {
+            // No activities found
+            return res.status(404).json("No activities found");
+        }
+    } catch (err) {
+        return res.status(500).json("Internal Server Error");
+        // Handle the error
+    }
 }

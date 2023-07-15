@@ -1,6 +1,6 @@
 // Imports (express, named imports from userControlller)
 import express from "express"
-import { newSimpleActivity, fetchAllSimpleActivities, updateSimpleActivity, deleteSimpleActivity, likeUnlike, batchSimples, getAllSimples } from "../controllers/simplesController.js"
+import { newSimpleActivity, fetchAllSimpleActivities, updateSimpleActivity, deleteSimpleActivity, likeUnlike, batchSimples, getAllSimples, getLastActivityDate } from "../controllers/simplesController.js"
 import { isAuthenticated } from "../middleware/auth.js"
 
 // Consts (initializing router)
@@ -14,6 +14,7 @@ router.post("/updatesimpleactivity", updateSimpleActivity)
 router.post("/deletesimpleactivity", deleteSimpleActivity)
 router.post("/batch", batchSimples)
 router.get("/allactivities", isAuthenticated, getAllSimples)
+router.get("/fetchlastsimples", getLastActivityDate)
 
 // Export (default)
 export default router
