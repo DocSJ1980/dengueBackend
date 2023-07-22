@@ -1,5 +1,5 @@
 FROM node:18-alpine
-WORKDIR /app
+WORKDIR /denguebackend
 RUN apk add --no-cache tzdata
 RUN cp /usr/share/zoneinfo/Asia/Karachi /etc/localtime
 COPY package.json .

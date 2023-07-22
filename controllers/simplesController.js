@@ -126,7 +126,7 @@ export const deleteSimpleActivity = async (req, res) => {
 // Fifth Route: batch submit simples activities
 export const batchSimples = async (req, res, next) => {
     const { allActivities } = req.body
-    console.log("countActivities: ", allActivities.length)
+    // console.log("countActivities: ", allActivities.length)
     // console.log(allActivities)
     try {
         // const insertedSimples = await SimpleActivity.insertMany(allActivities)
@@ -143,7 +143,7 @@ export const batchSimples = async (req, res, next) => {
                 // console.log("Submitted: ", activitySubmitted)
             } catch (error) {
                 notSubmitted++
-                // console.log("Not Submitted: ", notSubmitted)
+                // console.log("Not Submitted error: ", error)
             }
             i++
         }
@@ -201,3 +201,51 @@ export const getLastActivityDate = async (req, res) => {
         // Handle the error
     }
 }
+
+export const getLastActivityDateFromDate = async (req, res) => {
+    const { checkDate } = req.body;
+    // console.log(checkDate)
+    const startDate = new Date(checkDate);
+    startDate.setUTCHours(0, 0, 0, 0);
+    console.log("StartDate: ", startDate)
+    const newStartDate = new Date(startDate)
+
+    newStartDate.setHours(newStartDate.getHours() - 5);
+    // newStartDate.setHours(19, 0, 0); // Set time to 19:00:00
+    console.log("New StartDate: ", newStartDate);
+    const endDate = new Date(checkDate);
+    endDate.setUTCHours(23, 59, 59, 999);
+    endDate.setHours(18, 59, 59);
+    // console.log("EndDate: ", endDate)
+
+    try {
+        const lastActivity = await SimpleActivity.findOne({
+            dateSubmitted: {
+                $gte: startDate,
+                $lte: endDate,
+            },
+        }, { dateSubmitted: 1 })
+            .sort({ dateSubmitted: -1 })
+            .lean();
+        if (lastActivity) {
+            const lastActivityDate = lastActivity.dateSubmitted;
+            console.log(lastActivityDate)
+            // Use the lastActivityDate as needed
+            return res.status(200).json(lastActivityDate);
+        } else {
+            // No activities found
+            // Convert the startDate to a Date object
+            const dateObject = new Date(startDate);
+
+            // Subtract 5 hours from the dateObject
+            dateObject.setHours(dateObject.getHours() - 5);
+
+            // Return the updated date as a JSON response
+            return res.status(200).json(dateObject);
+        }
+    } catch (err) {
+        return res.status(500).json("Internal Server Error");
+        // Handle the error
+    }
+}
+
