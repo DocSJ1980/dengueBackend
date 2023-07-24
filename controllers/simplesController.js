@@ -155,6 +155,14 @@ export const batchSimples = async (req, res, next) => {
 
 //. 6th Route: Get all simple activities from UCs indoor and outdoor teams
 
+/**
+ * Retrieves all simples based on the given request.
+ *
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @param {function} next - The next middleware function.
+ * @return {object} The response containing the simples.
+ */
 export const getAllSimples = async (req, res, next) => {
     const page = req.query.page || 0
     const activitiesPerPage = 20
@@ -184,6 +192,14 @@ export const getAllSimples = async (req, res, next) => {
 }
 
 export const getLastActivityDate = async (req, res) => {
+    /**
+     * Gets the last activity date from a given date.
+     *
+     * @param {Object} req - The request object.
+     * @param {Object} res - The response object.
+     * @returns {Object} The last activity date.
+     */
+
     try {
         const lastActivity = await SimpleActivity.findOne({}, { dateSubmitted: 1 })
             .sort({ dateSubmitted: -1 })
@@ -203,25 +219,31 @@ export const getLastActivityDate = async (req, res) => {
 }
 
 export const getLastActivityDateFromDate = async (req, res) => {
+    /**
+ * Gets the last activity date from a given date.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The last activity date.
+ */
     const { checkDate } = req.body;
-    // console.log(checkDate)
     const startDate = new Date(checkDate);
     startDate.setUTCHours(0, 0, 0, 0);
-    console.log("StartDate: ", startDate)
-    const newStartDate = new Date(startDate)
+    console.log("StartDate: ", startDate);
 
-    newStartDate.setHours(newStartDate.getHours() - 5);
-    // newStartDate.setHours(19, 0, 0); // Set time to 19:00:00
+    const newStartDate = new Date(startDate);
+    newStartDate.setUTCHours(newStartDate.getUTCHours() - 5);
+    newStartDate.setUTCHours(19, 0, 0, 0); // Set time to 19:00:00 in UTC
     console.log("New StartDate: ", newStartDate);
+
     const endDate = new Date(checkDate);
     endDate.setUTCHours(23, 59, 59, 999);
-    endDate.setHours(18, 59, 59);
-    // console.log("EndDate: ", endDate)
-
+    endDate.setUTCHours(18, 59, 59, 999); // Set time to 18:59:59.999 in UTC
+    console.log("EndDate: ", endDate);
     try {
         const lastActivity = await SimpleActivity.findOne({
             dateSubmitted: {
-                $gte: startDate,
+                $gte: newStartDate,
                 $lte: endDate,
             },
         }, { dateSubmitted: 1 })
